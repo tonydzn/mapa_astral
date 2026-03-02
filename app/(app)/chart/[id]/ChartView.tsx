@@ -1,17 +1,27 @@
-"use client";
-
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import MandalaChart from "@/components/astro/MandalaChart";
 import Header from "@/components/layout/Header";
+import PremiumModal from "@/components/checkout/PremiumModal";
 import type { ChartData } from "@/lib/astro-engine";
+
+// Carregamento dinâmico para evitar erros de SSR com o gerador de PDF
+const PDFDownloadLink = dynamic(
+    () => import("@react-pdf/renderer").then((mod) => mod.PDFDownloadLink),
+    { ssr: false }
+);
+const ChartPDF = dynamic(
+    () => import("@/components/astro/ChartPDF"),
+    { ssr: false }
+);
 
 interface Chart {
     id: string; name: string | null; birth_date: string;
     birth_time: string | null; birth_place: string | null;
     chart_data: unknown; full_interpretation: string | null;
 }
-interface Profile { full_name: string | null; is_premium: boolean; }
+interface Profile { id: string; full_name: string | null; is_premium: boolean; }
 interface Props { chart: Chart; profile: Profile | null; }
 
 const PLANET_SYMBOLS: Record<string, string> = {
@@ -50,6 +60,9 @@ export default function ChartView({ chart, profile }: Props) {
     const [generating, setGenerating] = useState(false);
     const [interpretationError, setInterpretationError] = useState("");
     const [activeTab, setActiveTab] = useState("planets");
+    const [showPremium, setShowPremium] = useState(false);
+
+    const isPremium = profile?.is_premium ?? false;
 
     async function handleGenerate() {
         setGenerating(true);
@@ -76,6 +89,8 @@ export default function ChartView({ chart, profile }: Props) {
 
     return (
         <div style={{ minHeight: "100dvh", background: "#020617", color: "#f1f5f9", fontFamily: "var(--font-inter), system-ui, sans-serif" }}>
+            {showPremium && <PremiumModal onClose={() => setShowPremium(false)} userId={profile?.id ?? ""} />}
+
             {/* ===== HEADER ===== */}
             <Header
                 showBack={true}
@@ -85,6 +100,7 @@ export default function ChartView({ chart, profile }: Props) {
                 tabs={tabs}
                 onTabChange={setActiveTab}
                 profile={profile}
+                onShowPremium={() => setShowPremium(true)}
             />
 
             {/* ===== CONTENT ===== */}
@@ -172,9 +188,31 @@ export default function ChartView({ chart, profile }: Props) {
                                         {profile?.is_premium ? "✦ Interpretação Completa (Premium)" : "Análise Essencial (gratuito)"}
                                     </p>
                                 </div>
-                                <button onClick={handleGenerate} disabled={generating} className="btn-gold" style={{ padding: "9px 18px", fontSize: 13 }}>
-                                    {generating ? "⏳ Gerando..." : interpretation ? "🔄 Regenerar" : "✨ Gerar interpretação"}
-                                </button>
+                                <div style={{ display: "flex", gap: 10 }}>
+                                    {interpretation && (
+                                        isPremium ? (
+                                            <PDFDownloadLink
+                                                document={<ChartPDF data={chartData} userName={profile?.full_name || "Astronauta"} interpretation={interpretation} birthTitle={[chart.birth_place, chart.birth_date && new Date(chart.birth_date).toLocaleDateString("pt-BR"), chart.birth_time && `às ${chart.birth_time}`].filter(Boolean).join(" · ")} />}
+                                                fileName={`mapa-astral-${chart.name || "meu-mapa"}.pdf`}
+                                                style={{ textDecoration: "none" }}
+                                            >
+                                                {/* @ts-ignore */}
+                                                {({ loading }) => (
+                                                    <button className="btn-secondary" style={{ padding: "9px 18px", fontSize: 13, display: "flex", alignItems: "center", gap: 8 }}>
+                                                        {loading ? "⌛ Preparando..." : "📥 Baixar PDF"}
+                                                    </button>
+                                                )}
+                                            </PDFDownloadLink>
+                                        ) : (
+                                            <button onClick={() => setShowPremium(true)} className="btn-secondary" style={{ padding: "9px 18px", fontSize: 13, display: "flex", alignItems: "center", gap: 8 }}>
+                                                📥 Baixar PDF <span style={{ fontSize: 10, background: "rgba(245,158,11,.2)", color: "#f59e0b", padding: "2px 6px", borderRadius: 4, marginLeft: 6 }}>Premium</span>
+                                            </button>
+                                        )
+                                    )}
+                                    <button onClick={handleGenerate} disabled={generating} className="btn-gold" style={{ padding: "9px 18px", fontSize: 13 }}>
+                                        {generating ? "⏳ Gerando..." : interpretation ? "🔄 Regenerar" : "✨ Gerar interpretação"}
+                                    </button>
+                                </div>
                             </div>
 
                             {interpretationError && (
