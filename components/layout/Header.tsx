@@ -62,27 +62,27 @@ export default function Header({
                 gap: 12,
                 height: 60
             }}>
-                {/* Back Button or Logo */}
-                {showBack ? (
-                    <Link href="/dashboard" style={{
-                        color: "#334155",
-                        textDecoration: "none",
-                        fontSize: 22,
-                        display: "flex",
-                        alignItems: "center",
-                        transition: "color .2s",
-                        marginRight: 8
-                    }}
-                        onMouseEnter={e => (e.currentTarget.style.color = "#94a3b8")}
-                        onMouseLeave={e => (e.currentTarget.style.color = "#334155")}>
-                        ←
-                    </Link>
-                ) : (
-                    <Link href="/dashboard" style={{ display: "flex", alignItems: "center", gap: 8, marginRight: 20, textDecoration: "none" }}>
+                {/* Logo & Back button */}
+                <div style={{ display: "flex", alignItems: "center", gap: 12, marginRight: 20 }}>
+                    {showBack && (
+                        <Link href="/dashboard" style={{
+                            color: "#475569",
+                            textDecoration: "none",
+                            fontSize: 22,
+                            display: "flex",
+                            alignItems: "center",
+                            transition: "color .2s",
+                        }}
+                            onMouseEnter={e => (e.currentTarget.style.color = "#94a3b8")}
+                            onMouseLeave={e => (e.currentTarget.style.color = "#475569")}>
+                            ←
+                        </Link>
+                    )}
+                    <Link href="/dashboard" style={{ display: "flex", alignItems: "center", gap: 8, textDecoration: "none" }}>
                         <span style={{ color: "#f59e0b", fontSize: 18, filter: "drop-shadow(0 0 8px rgba(245,158,11,.5))" }}>✦</span>
                         <span style={{ color: "#f59e0b", fontWeight: 800, letterSpacing: 2, fontSize: 16 }}>Mapa Astral</span>
                     </Link>
-                )}
+                </div>
 
                 {/* Title and Subtitle (for pages like Chart) */}
                 {(title || subtitle) && (

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { createBirthChart } from "@/actions/chart.actions";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Header from "@/components/layout/Header";
 
 interface GeoResult {
     display_name: string;
@@ -79,15 +80,11 @@ export default function NewChartPage() {
                 <div style={{ position: "absolute", top: 0, left: "50%", transform: "translateX(-50%)", width: 600, height: 600, borderRadius: "50%", background: "radial-gradient(circle,rgba(139,92,246,0.05),transparent)" }} />
             </div>
 
-            {/* Header */}
-            <header style={{ borderBottom: "1px solid #1e293b", padding: "14px 24px", display: "flex", alignItems: "center", gap: 16, backdropFilter: "blur(10px)", background: "rgba(2,6,23,0.85)", position: "relative", zIndex: 10 }}>
-                <Link href="/dashboard" style={{ color: "#64748b", fontSize: 20, textDecoration: "none" }}>←</Link>
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                    <span style={{ color: "#f59e0b" }}>✦</span>
-                    <span style={{ color: "#f59e0b", fontWeight: "bold", letterSpacing: 2 }}>Mapa Astral</span>
-                </div>
-                <h1 style={{ color: "white", fontSize: 16, fontWeight: "bold", margin: 0 }}>Novo Mapa Natal</h1>
-            </header>
+            <Header
+                showBack={true}
+                title="Novo Mapa Natal"
+                profile={null} // O perfil será carregado via hook se necessário, ou podemos passar um prop
+            />
 
             <main style={{ maxWidth: 560, margin: "0 auto", padding: "40px 24px", position: "relative", zIndex: 10 }}>
                 <div style={{ textAlign: "center", marginBottom: 32 }}>
