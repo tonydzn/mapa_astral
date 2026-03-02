@@ -3,6 +3,7 @@
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { calculateChart, type BirthData } from "@/lib/astro-engine";
 import { revalidatePath } from "next/cache";
+import type { Json } from "@/types/database.types";
 
 export async function createBirthChart(formData: {
     name: string;
@@ -51,7 +52,7 @@ export async function createBirthChart(formData: {
             birth_place: formData.birth_place,
             latitude: formData.latitude,
             longitude: formData.longitude,
-            chart_data: chartData as unknown as Record<string, unknown>,
+            chart_data: chartData as any,
         })
         .select()
         .single();

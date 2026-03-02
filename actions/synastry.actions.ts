@@ -2,7 +2,6 @@
 
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
-import { nanoid } from "crypto";
 
 function generateSlug(): string {
     return Math.random().toString(36).substring(2, 10);

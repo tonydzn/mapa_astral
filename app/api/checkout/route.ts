@@ -89,15 +89,29 @@ export async function POST(req: NextRequest) {
             preference_id: preference.id,
         });
     } catch (err: any) {
+        // Log detalhado para depuração
         console.error("MP checkout error details:", {
             message: err.message,
             stack: err.stack,
             cause: err.cause,
-            response: err.response?.data,
+            status: err.response?.status,
+            data: err.response?.data,
+            params: {
+                unit_price: finalPrice,
+                email: user.email,
+                external_reference: `${user.id}|${order?.id ?? ""}`
+            }
         });
+
+        // Se for erro de validação do MP (ex: preço inválido ou data malformada)
+        const mpErrorMsg = err.response?.data?.message || err.message;
+
         return NextResponse.json(
-            { error: "Erro ao criar preferência de pagamento. Tente novamente." },
-            { status: 500 }
+            {
+                error: "Erro ao criar preferência de pagamento. Tente novamente.",
+                details: process.env.NODE_ENV === "development" ? mpErrorMsg : undefined
+            },
+            { status: err.response?.status || 500 }
         );
     }
 }

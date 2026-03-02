@@ -9,14 +9,14 @@ export default async function ChartPage({ params }: { params: Promise<{ id: stri
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) redirect("/login");
 
-    const { data: chart } = await supabase
+    const { data: chart, error } = await supabase
         .from("birth_charts")
         .select("*")
         .eq("id", id)
         .eq("user_id", user.id)
         .single();
 
-    if (!chart) return notFound();
+    if (error || !chart) return notFound();
 
     const { data: profile } = await supabase
         .from("profiles")
@@ -24,5 +24,5 @@ export default async function ChartPage({ params }: { params: Promise<{ id: stri
         .eq("id", user.id)
         .single();
 
-    return <ChartView chart={chart} isPremium={profile?.is_premium ?? false} />;
+    return <ChartView chart={chart as any} isPremium={profile?.is_premium ?? false} />;
 }

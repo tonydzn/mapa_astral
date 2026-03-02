@@ -22,9 +22,9 @@ export default async function DashboardPage() {
 
     return (
         <DashboardClient
-            profile={profile}
-            charts={charts}
-            moodLogs={moodLogs}
+            profile={profile as any}
+            charts={charts as any}
+            moodLogs={moodLogs as any}
             moonPhase={moonPhase}
         />
     );

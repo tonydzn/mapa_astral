@@ -2,32 +2,35 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { notFound } from "next/navigation";
 import SynastryForm from "./SynastryForm";
 
-export default async function SynastryPublicPage({ params }: { params: { slug: string } }) {
+export default async function SynastryPublicPage({ params }: { params: Promise<{ slug: string }> }) {
+    const { slug } = await params;
     const supabase = createAdminClient();
 
     const { data: link, error } = await supabase
         .from("synastry_links")
         .select("*")
-        .eq("slug", params.slug)
+        .eq("slug", slug)
         .single();
 
     if (error || !link) return notFound();
 
+    const l = link as any;
+
     // Incrementa views
     await supabase
         .from("synastry_links")
-        .update({ views_count: (link.views_count ?? 0) + 1 })
-        .eq("id", link.id);
+        .update({ views_count: (l.views_count ?? 0) + 1 })
+        .eq("id", l.id);
 
     // Busca nome do owner
     const { data: profile } = await supabase
         .from("profiles")
         .select("full_name")
-        .eq("id", link.owner_id)
+        .eq("id", l.owner_id)
         .single();
 
     const ownerName = profile?.full_name ?? "alguém";
-    const isCompleted = !!link.second_person_name;
+    const isCompleted = !!l.second_person_name;
 
     return (
         <div style={{ minHeight: "100vh", background: "#020617", color: "#e2e8f0", fontFamily: "Georgia, serif" }}>
@@ -53,11 +56,11 @@ export default async function SynastryPublicPage({ params }: { params: { slug: s
                             <div style={{ fontSize: 64, marginBottom: 16 }}>✨</div>
                             <h2 style={{ color: "#c4b5fd", marginBottom: 8, fontSize: 22 }}>Sinastria Completa!</h2>
                             <p style={{ color: "#94a3b8", fontSize: 14, marginBottom: 16 }}>
-                                {ownerName} e <strong style={{ color: "#e2e8f0" }}>{link.second_person_name}</strong> já têm sua compatibilidade calculada.
+                                {ownerName} e <strong style={{ color: "#e2e8f0" }}>{l.second_person_name}</strong> já têm sua compatibilidade calculada.
                             </p>
-                            {link.compatibility_score && (
+                            {l.compatibility_score && (
                                 <div style={{ fontSize: 56, color: "#f59e0b", fontWeight: "bold", margin: "16px 0" }}>
-                                    {link.compatibility_score}%
+                                    {l.compatibility_score}%
                                 </div>
                             )}
                             <a href="/"
@@ -67,7 +70,7 @@ export default async function SynastryPublicPage({ params }: { params: { slug: s
                         </div>
                     </div>
                 ) : (
-                    <SynastryForm linkId={link.id} ownerName={ownerName} />
+                    <SynastryForm linkId={l.id} ownerName={ownerName} />
                 )}
             </div>
         </div>

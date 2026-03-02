@@ -2,10 +2,11 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import MandalaChart from "@/components/astro/MandalaChart";
 import PremiumModal from "@/components/checkout/PremiumModal";
+import { logMood } from "@/actions/mood.actions";
 import type { MoonPhase } from "@/lib/astro-engine";
 
 interface Profile {
@@ -54,9 +55,21 @@ const SIGN_FROM_DATA = (chart: Chart): string => {
 
 export default function DashboardClient({ profile, charts, moodLogs, moonPhase }: Props) {
     const router = useRouter();
+    const searchParams = useSearchParams();
     const supabase = createClient();
     const [showPremium, setShowPremium] = useState(false);
     const [activeTab, setActiveTab] = useState("overview");
+    const [notif, setNotif] = useState<{ msg: string; type: "success" | "error" | "info" } | null>(null);
+    const [moodLoading, setMoodLoading] = useState(false);
+
+    const paymentStatus = searchParams.get("payment");
+
+    // Feedback de pagamento
+    useState(() => {
+        if (paymentStatus === "success") setNotif({ msg: "✨ Parabéns! Seu acesso Premium foi ativado com sucesso.", type: "success" });
+        if (paymentStatus === "failure") setNotif({ msg: "❌ O pagamento não foi concluído. Tente novamente ou use outro cartão.", type: "error" });
+        if (paymentStatus === "pending") setNotif({ msg: "⏳ Seu pagamento está em processamento. Avisaremos assim que for aprovado.", type: "info" });
+    });
 
     const isPremium = profile?.is_premium ?? false;
     const mapsCount = profile?.maps_count ?? 0;
@@ -70,9 +83,39 @@ export default function DashboardClient({ profile, charts, moodLogs, moonPhase }
         router.push("/");
     }
 
+    async function handleLogMood(score: number) {
+        if (moodLoading) return;
+        setMoodLoading(true);
+        const res = await logMood(score);
+        if (res.success) {
+            setNotif({ msg: "Humor registrado com sucesso! ✦", type: "success" });
+            setTimeout(() => setNotif(null), 3000);
+        } else {
+            setNotif({ msg: "Erro ao registrar humor. Tente novamente.", type: "error" });
+        }
+        setMoodLoading(false);
+    }
+
     return (
         <div style={{ minHeight: "100dvh", background: "#020617", color: "#f1f5f9", fontFamily: "var(--font-inter), system-ui, sans-serif", position: "relative" }}>
             {showPremium && <PremiumModal onClose={() => setShowPremium(false)} userId={profile?.id ?? ""} />}
+
+            {/* Notifications */}
+            {notif && (
+                <div style={{
+                    position: "fixed", top: 80, right: 24, zIndex: 100,
+                    padding: "12px 20px", borderRadius: 12,
+                    background: notif.type === "success" ? "rgba(16,185,129,0.9)" : notif.type === "error" ? "rgba(239,68,68,0.9)" : "rgba(59,130,246,0.9)",
+                    backdropFilter: "blur(10px)", color: "#fff", fontSize: 13, fontWeight: 500,
+                    boxShadow: "0 10px 25px -5px rgba(0,0,0,0.3)",
+                    border: "1px solid rgba(255,255,255,0.1)",
+                    display: "flex", alignItems: "center", gap: 10,
+                    animation: "slideIn 0.3s ease-out"
+                }}>
+                    <span>{notif.msg}</span>
+                    <button onClick={() => setNotif(null)} style={{ background: "none", border: "none", color: "#fff", cursor: "pointer", opacity: 0.7 }}>✕</button>
+                </div>
+            )}
 
             {/* Ambient */}
             <div className="ambient">
@@ -243,11 +286,20 @@ export default function DashboardClient({ profile, charts, moodLogs, moonPhase }
                                 </div>
                                 <p style={{ fontSize: 12, color: "#334155", marginBottom: 12 }}>Como você está hoje?</p>
                                 <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
-                                    {["😔", "😐", "🙂", "😊", "🌟"].map((m, i) => (
-                                        <button key={i} style={{ fontSize: 24, width: 44, height: 44, borderRadius: "50%", border: "1px solid rgba(139,92,246,.2)", background: "rgba(139,92,246,.06)", cursor: "pointer", transition: "all .2s", display: "flex", alignItems: "center", justifyContent: "center" }}
-                                            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = "scale(1.2)"; (e.currentTarget as HTMLElement).style.borderColor = "rgba(139,92,246,.6)"; }}
+                                    {[
+                                        { e: "😔", s: 2 },
+                                        { e: "😐", s: 4 },
+                                        { e: "🙂", s: 6 },
+                                        { e: "😊", s: 8 },
+                                        { e: "🌟", s: 10 }
+                                    ].map((m, i) => (
+                                        <button key={i}
+                                            onClick={() => handleLogMood(m.s)}
+                                            disabled={moodLoading}
+                                            style={{ fontSize: 24, width: 44, height: 44, borderRadius: "50%", border: "1px solid rgba(139,92,246,.2)", background: "rgba(139,92,246,.06)", cursor: moodLoading ? "default" : "pointer", transition: "all .2s", display: "flex", alignItems: "center", justifyContent: "center", padding: 0 }}
+                                            onMouseEnter={e => { if (!moodLoading) { (e.currentTarget as HTMLElement).style.transform = "scale(1.2)"; (e.currentTarget as HTMLElement).style.borderColor = "rgba(139,92,246,.6)"; } }}
                                             onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = ""; (e.currentTarget as HTMLElement).style.borderColor = "rgba(139,92,246,.2)"; }}>
-                                            {m}
+                                            {m.e}
                                         </button>
                                     ))}
                                 </div>
@@ -316,11 +368,20 @@ export default function DashboardClient({ profile, charts, moodLogs, moonPhase }
                             <div className="card" style={{ padding: 24 }}>
                                 <h3 style={{ fontSize: 15, color: "#c4b5fd", fontWeight: 700, marginBottom: 16 }}>Registrar Humor</h3>
                                 <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-                                    {["😔 Péssimo", "😐 Regular", "🙂 Bom", "😊 Ótimo", "🌟 Incrível"].map((m, i) => (
-                                        <button key={i} style={{ padding: "8px 14px", borderRadius: 20, border: "1px solid rgba(139,92,246,.2)", background: "rgba(139,92,246,.06)", color: "#94a3b8", fontSize: 13, cursor: "pointer", transition: "all .2s", fontFamily: "inherit" }}
-                                            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(139,92,246,.5)"; (e.currentTarget as HTMLElement).style.color = "#f1f5f9"; }}
-                                            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(139,92,246,.2)"; (e.currentTarget as HTMLElement).style.color = "#94a3b8"; }}>
-                                            {m}
+                                    {[
+                                        { e: "😔 Péssimo", s: 2 },
+                                        { e: "😐 Regular", s: 4 },
+                                        { e: "🙂 Bom", s: 6 },
+                                        { e: "😊 Ótimo", s: 8 },
+                                        { e: "🌟 Incrível", s: 10 }
+                                    ].map((m, i) => (
+                                        <button key={i}
+                                            onClick={() => handleLogMood(m.s)}
+                                            disabled={moodLoading}
+                                            style={{ padding: "8px 14px", borderRadius: 20, border: "1px solid rgba(139,92,246,.2)", background: "rgba(139,92,246,.06)", color: "#94a3b8", fontSize: 13, cursor: moodLoading ? "default" : "pointer", transition: "all .2s", fontFamily: "inherit" }}
+                                            onMouseEnter={e => { if (!moodLoading) { (e.currentTarget as HTMLElement).style.borderColor = "rgba(139,92,246,.5)"; (e.currentTarget as HTMLElement).style.color = "#f1f5f9"; } }}
+                                            onMouseLeave={e => { if (!moodLoading) { (e.currentTarget as HTMLElement).style.borderColor = "rgba(139,92,246,.2)"; (e.currentTarget as HTMLElement).style.color = "#94a3b8"; } }}>
+                                            {m.e}
                                         </button>
                                     ))}
                                 </div>
