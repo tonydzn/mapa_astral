@@ -25,11 +25,32 @@ export async function createBirthChart(formData: {
 
     if (!profile) return { error: "Perfil não encontrado" };
 
-    if (!profile.is_premium && profile.maps_count >= profile.maps_limit) {
-        return {
-            error: "LIMIT_REACHED",
-            message: `Você atingiu o limite de ${profile.maps_limit} mapas. Torne-se Premium para mapas ilimitados!`,
-        };
+    // Calcula 30 dias atrás
+    const now = new Date();
+    const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString();
+
+    if (profile.is_premium) {
+        // Premium: 1 mapa a cada 30 dias
+        const { count } = await supabase
+            .from("birth_charts")
+            .select("*", { count: "exact", head: true })
+            .eq("user_id", user.id)
+            .gte("created_at", thirtyDaysAgo);
+
+        if (count && count >= 1) {
+            return {
+                error: "LIMIT_REACHED",
+                message: "Como usuário Premium, você pode gerar 1 mapa completo a cada 30 dias.",
+            };
+        }
+    } else {
+        // Gratuito: 1 mapa total
+        if (profile.maps_count >= 1) {
+            return {
+                error: "LIMIT_REACHED",
+                message: "Você atingiu o limite de 1 mapa gratuito. Torne-se Premium para gerar novos mapas completos mensalmente!",
+            };
+        }
     }
 
     const birthData: BirthData = {

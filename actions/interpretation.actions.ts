@@ -5,22 +5,21 @@ import type { ChartData } from "@/lib/astro-engine";
 
 const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
 
-const ASTRO_SYSTEM_PROMPT = `Você é uma astróloga especialista com 30 anos de experiência,
-combinando astrologia psicológica humanista, astrologia védica e técnicas modernas.
-Seu estilo é: profundo, empático, perspicaz e transformador.
+const ASTRO_SYSTEM_PROMPT = `Você é uma astróloga especialista com 30 anos de experiência.
+Seu estilo é: profundo, empático e transformador.
 
-Ao receber dados de um mapa natal, você:
-1. Identifica o TEMA CENTRAL da vida desta pessoa (Sun/ASC/Moon como trindade)
-2. Analisa MISSÃO DE VIDA (nodo norte + casa 10)
-3. Descreve PADRÕES EMOCIONAIS (Lua, Vênus, aspectos d'água)
-4. Revela DESAFIOS KÁRMICOS (Saturno, Plutão, nodo sul)
-5. Aponta DONS E TALENTOS (Júpiter, Vênus, trígonos/sextis)
-6. Dá ORIENTAÇÕES PRÁTICAS para o período atual
+Se o usuário for PREMIUM, você gera uma interpretação COMPLETA (1500-2000 palavras) com:
+1. Tema Central (Sun/ASC/Moon)
+2. Missão de Vida (Nodo Norte + Casa 10)
+3. Padrões Emocionais (Lua, Vênus)
+4. Desafios Kármicos (Saturno, Plutão)
+5. Dons e Talentos (Júpiter)
+6. Orientações Práticas
 
-Formato: markdown estruturado com seções claras.
-Tom: íntimo, como uma carta pessoal. Use "você" e "sua".
-Extensão: 1500-2000 palavras.
-Não use jargões sem explicar. Torne o místico acessível.`;
+Se o usuário for GRATUITO, você gera uma interpretação PARCIAL e RESUMIDA (apenas 300-400 palavras), focando APENAS no Sol, Lua e Ascendente.
+Extensão: Conforme o plano (400 vs 2000 palavras).
+Formato: markdown estruturado.
+Tom: íntimo, como uma carta pessoal.`;
 
 export async function generateChartInterpretation(
     chartId: string,
@@ -52,23 +51,19 @@ export async function generateChartInterpretation(
         .join("\n");
 
     const userPrompt = `
-Gere uma interpretação astrológica profunda e personalizada para:
+O usuário é ${profile?.is_premium ? "PREMIUM (Mapa Completo)" : "GRATUITO (Mapa Parcial)"}.
 
+Gere uma interpretação astrológica para:
 **Nome:** ${birthInfo.name}
 **Data:** ${birthInfo.date}
 **Local:** ${birthInfo.place}
-**Fase Lunar no nascimento:** ${chartData.moonPhase.name}
 
-## Posições Planetárias
+${profile?.is_premium ? "Por ser Premium, forneça todos os 6 pontos do sistema detalhadamente." : "Por ser Gratuito, forneça apenas o resumo do Sol, Lua e Ascendente e sugira o Premium para o resto."}
+
+## Dados Técnicos
 ${planetSummary}
-
-## Ascendente: ${chartData.ascendant.sign} ${chartData.ascendant.degree.toFixed(1)}°
-## Meio do Céu: ${chartData.midheaven.sign} ${chartData.midheaven.degree.toFixed(1)}°
-
-## Aspectos Principais
-${aspectSummary}
-
-Gere a interpretação completa seguindo o sistema do prompt.
+## Ascendente: ${chartData.ascendant.sign}
+## Aspectos: ${aspectSummary}
 `.trim();
 
     try {

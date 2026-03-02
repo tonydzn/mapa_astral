@@ -13,7 +13,7 @@ export default function PremiumModal({ onClose, userId }: Props) {
     const [error, setError] = useState("");
 
     const features = [
-        ["🌌", "Mapas ilimitados"],
+        ["🌌", "1 Mapa Completo/mês"],
         ["🤖", "Interpretação Avançada"],
         ["📄", "PDFs personalizados"],
         ["💑", "Sinastria completa"],

@@ -34,7 +34,7 @@ export default function Pricing() {
                             <div style={{ color: "#475569", fontSize: 13 }}>Para sempre</div>
                         </div>
                         <div style={{ borderTop: "1px solid #1a2540", paddingTop: 20, marginBottom: 24 }}>
-                            {[["✓", "3 mapas natais", "#22c55e"], ["✓", "Interpretação básica", "#22c55e"], ["✓", "Mood tracker", "#22c55e"], ["✓", "Compartilhamento", "#22c55e"], ["✗", "PDF personalizado", "#334155"], ["✗", "Sinastria", "#334155"], ["✗", "Interpretação Avançada", "#334155"]].map(([ic, tx, c], i) => (
+                            {[["✓", "1 Mapa Natal Parcial", "#22c55e"], ["✓", "Interpretação Ascendente", "#22c55e"], ["✓", "Mood tracker", "#22c55e"], ["✓", "Compartilhamento", "#22c55e"], ["✗", "PDF personalizado", "#334155"], ["✗", "Sinastria", "#334155"], ["✗", "Mapa Completo", "#334155"]].map(([ic, tx, c], i) => (
                                 <div key={i} style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: 10, fontSize: 14, color: c === "#22c55e" ? "#94a3b8" : "#2d3e5a" }}>
                                     <span style={{ color: c, fontWeight: 700 }}>{ic}</span> {tx}
                                 </div>
@@ -66,7 +66,7 @@ export default function Pricing() {
                         </div>
 
                         <div style={{ borderTop: "1px solid rgba(245,158,11,.2)", paddingTop: 20, marginBottom: 24 }}>
-                            {[["Mapas ilimitados"], ["Interpretação Avançada"], ["PDF personalizado"], ["Sinastria amorosa"], ["Previsões mensais"], ["Suporte prioritário"]].map(([tx], i) => (
+                            {[["1 Mapa Completo p/ mês"], ["Interpretação Avançada"], ["PDF personalizado"], ["Sinastria amorosa"], ["Previsões mensais"], ["Suporte prioritário"]].map(([tx], i) => (
                                 <div key={i} style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: 10, fontSize: 14, color: "#cbd5e1" }}>
                                     <span style={{ color: "#f59e0b" }}>✦</span> {tx}
                                 </div>
