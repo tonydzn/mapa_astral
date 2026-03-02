@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import MandalaChart from "@/components/astro/MandalaChart";
 import PremiumModal from "@/components/checkout/PremiumModal";
+import Header from "@/components/layout/Header";
 import { logMood } from "@/actions/mood.actions";
 import type { MoonPhase } from "@/lib/astro-engine";
 
@@ -78,10 +79,11 @@ export default function DashboardClient({ profile, charts, moodLogs, moonPhase }
     const sunSign = charts[0] ? SIGN_FROM_DATA(charts[0]) : "—";
     const progressPct = isPremium ? 100 : Math.min((mapsCount / mapsLimit) * 100, 100);
 
-    async function logout() {
-        await supabase.auth.signOut();
-        router.push("/");
-    }
+    const dashboardTabs = [
+        { key: "overview", label: "Início" },
+        { key: "charts", label: "Mapas" },
+        { key: "mood", label: "Humor" }
+    ];
 
     async function handleLogMood(score: number) {
         if (moodLoading) return;
@@ -124,40 +126,13 @@ export default function DashboardClient({ profile, charts, moodLogs, moonPhase }
             </div>
 
             {/* ===== HEADER ===== */}
-            <header style={{ position: "sticky", top: 0, zIndex: 30, borderBottom: "1px solid rgba(255,255,255,.05)", background: "rgba(2,6,23,.9)", backdropFilter: "blur(20px)", padding: "0 24px" }}>
-                <div style={{ maxWidth: 1200, margin: "0 auto", display: "flex", alignItems: "center", gap: 12, height: 60 }}>
-                    {/* Logo */}
-                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginRight: 20 }}>
-                        <span style={{ color: "#f59e0b", fontSize: 18, filter: "drop-shadow(0 0 8px rgba(245,158,11,.5))" }}>✦</span>
-                        <span style={{ color: "#f59e0b", fontWeight: 800, letterSpacing: 2, fontSize: 16 }}>Mapa Astral</span>
-                    </div>
-
-                    {/* Nav tabs */}
-                    <nav style={{ display: "flex", gap: 2, flex: 1 }}>
-                        {[["overview", "Início"], ["charts", "Mapas"], ["mood", "Humor"]].map(([key, label]) => (
-                            <button key={key} className={`nav-pill ${activeTab === key ? "active" : ""}`}
-                                onClick={() => setActiveTab(key)}>{label}</button>
-                        ))}
-                    </nav>
-
-                    {/* Right side */}
-                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                        {!isPremium && (
-                            <button onClick={() => setShowPremium(true)} className="btn-gold" style={{ padding: "7px 14px", fontSize: 13, borderRadius: 8 }}>
-                                ✨ Premium
-                            </button>
-                        )}
-                        {isPremium && <span className="badge-gold">✦ Premium</span>}
-                        <button onClick={logout} style={{ background: "none", border: "none", color: "#334155", cursor: "pointer", fontSize: 13, padding: "4px 8px", borderRadius: 6, transition: "color .2s", fontFamily: "inherit" }}
-                            onMouseEnter={e => (e.currentTarget.style.color = "#94a3b8")} onMouseLeave={e => (e.currentTarget.style.color = "#334155")}>
-                            Sair
-                        </button>
-                        <div style={{ width: 34, height: 34, borderRadius: "50%", background: "linear-gradient(135deg,#7c3aed,#f59e0b)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 14, color: "#fff", flexShrink: 0 }}>
-                            {firstName[0]?.toUpperCase() || "A"}
-                        </div>
-                    </div>
-                </div>
-            </header>
+            <Header
+                profile={profile as any}
+                activeTab={activeTab}
+                tabs={dashboardTabs}
+                onTabChange={setActiveTab}
+                onShowPremium={() => setShowPremium(true)}
+            />
 
             {/* ===== MAIN ===== */}
             <main style={{ maxWidth: 1200, margin: "0 auto", padding: "28px 24px", position: "relative", zIndex: 1 }} className="animate-fade-in">

@@ -15,6 +15,8 @@ export const metadata: Metadata = {
   },
 };
 
+import Footer from "@/components/layout/Footer";
+
 export default function RootLayout({
   children,
 }: {
@@ -24,6 +26,7 @@ export default function RootLayout({
     <html lang="pt-BR" className={inter.variable} suppressHydrationWarning data-scroll-behavior="smooth">
       <body suppressHydrationWarning>
         {children}
+        <Footer />
       </body>
     </html>
   );

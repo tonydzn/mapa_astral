@@ -20,9 +20,9 @@ export default async function ChartPage({ params }: { params: Promise<{ id: stri
 
     const { data: profile } = await supabase
         .from("profiles")
-        .select("is_premium")
+        .select("full_name, is_premium")
         .eq("id", user.id)
         .single();
 
-    return <ChartView chart={chart as any} isPremium={profile?.is_premium ?? false} />;
+    return <ChartView chart={chart as any} profile={profile as any} />;
 }

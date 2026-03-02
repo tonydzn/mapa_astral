@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import MandalaChart from "@/components/astro/MandalaChart";
+import Header from "@/components/layout/Header";
 import type { ChartData } from "@/lib/astro-engine";
 
 interface Chart {
@@ -10,7 +11,8 @@ interface Chart {
     birth_time: string | null; birth_place: string | null;
     chart_data: unknown; full_interpretation: string | null;
 }
-interface Props { chart: Chart; isPremium: boolean; }
+interface Profile { full_name: string | null; is_premium: boolean; }
+interface Props { chart: Chart; profile: Profile | null; }
 
 const PLANET_SYMBOLS: Record<string, string> = {
     "Sol": "☀", "Lua": "☽", "Mercúrio": "☿", "Vênus": "♀", "Marte": "♂",
@@ -42,7 +44,7 @@ function renderMarkdown(text: string): string {
         .replace(/^([^<\n].+)$/gm, (m) => m.startsWith('<') ? m : `<p>${m}</p>`);
 }
 
-export default function ChartView({ chart, isPremium }: Props) {
+export default function ChartView({ chart, profile }: Props) {
     const chartData = chart.chart_data as ChartData;
     const [interpretation, setInterpretation] = useState(chart.full_interpretation ?? "");
     const [generating, setGenerating] = useState(false);
@@ -74,34 +76,16 @@ export default function ChartView({ chart, isPremium }: Props) {
 
     return (
         <div style={{ minHeight: "100dvh", background: "#020617", color: "#f1f5f9", fontFamily: "var(--font-inter), system-ui, sans-serif" }}>
-            {/* Ambient */}
-            <div className="ambient">
-                <div className="blob" style={{ top: -100, left: "20%", width: 400, height: 400, background: "radial-gradient(circle,rgba(139,92,246,.05),transparent)" }} />
-            </div>
-
             {/* ===== HEADER ===== */}
-            <header style={{ position: "sticky", top: 0, zIndex: 20, borderBottom: "1px solid rgba(255,255,255,.05)", background: "rgba(2,6,23,.9)", backdropFilter: "blur(20px)", padding: "0 24px" }}>
-                <div style={{ maxWidth: 1200, margin: "0 auto", display: "flex", alignItems: "center", gap: 14, height: 60 }}>
-                    <Link href="/dashboard" style={{ color: "#334155", textDecoration: "none", fontSize: 22, display: "flex", alignItems: "center", transition: "color .2s" }}
-                        onMouseEnter={e => (e.currentTarget.style.color = "#94a3b8")} onMouseLeave={e => (e.currentTarget.style.color = "#334155")}>←</Link>
-
-                    <div style={{ flex: 1 }}>
-                        <div style={{ fontWeight: 700, color: "#f1f5f9", fontSize: 15, lineHeight: 1.2 }}>{chart.name || "Mapa Natal"}</div>
-                        <div style={{ color: "#334155", fontSize: 12 }}>
-                            {[chart.birth_place, chart.birth_date && new Date(chart.birth_date).toLocaleDateString("pt-BR"), chart.birth_time && `às ${chart.birth_time}`].filter(Boolean).join(" · ")}
-                        </div>
-                    </div>
-
-                    {/* Tabs */}
-                    <nav style={{ display: "flex", gap: 2 }}>
-                        {tabs.map(t => (
-                            <button key={t.key} className={`nav-pill ${activeTab === t.key ? "active" : ""}`} onClick={() => setActiveTab(t.key)}>
-                                {t.label}
-                            </button>
-                        ))}
-                    </nav>
-                </div>
-            </header>
+            <Header
+                showBack={true}
+                title={chart.name || "Mapa Natal"}
+                subtitle={[chart.birth_place, chart.birth_date && new Date(chart.birth_date).toLocaleDateString("pt-BR"), chart.birth_time && `às ${chart.birth_time}`].filter(Boolean).join(" · ")}
+                activeTab={activeTab}
+                tabs={tabs}
+                onTabChange={setActiveTab}
+                profile={profile}
+            />
 
             {/* ===== CONTENT ===== */}
             <div style={{ maxWidth: 1200, margin: "0 auto", padding: "24px", display: "grid", gridTemplateColumns: "280px 1fr", gap: 20, position: "relative", zIndex: 1 }} className="animate-fade-in">
@@ -185,7 +169,7 @@ export default function ChartView({ chart, isPremium }: Props) {
                                 <div>
                                     <h2 style={{ fontSize: 16, fontWeight: 700, color: "#fff", margin: 0 }}>Interpretação Estelar</h2>
                                     <p style={{ fontSize: 12, color: "#334155", marginTop: 4 }}>
-                                        {isPremium ? "✦ Interpretação Completa (Premium)" : "Análise Essencial (gratuito)"}
+                                        {profile?.is_premium ? "✦ Interpretação Completa (Premium)" : "Análise Essencial (gratuito)"}
                                     </p>
                                 </div>
                                 <button onClick={handleGenerate} disabled={generating} className="btn-gold" style={{ padding: "9px 18px", fontSize: 13 }}>
