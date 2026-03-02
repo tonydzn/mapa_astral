@@ -25,23 +25,25 @@ export default async function ChartPrintPage({ params }: { params: Promise<{ id:
 
     if (!profile?.is_premium) redirect(`/chart/${id}`);
 
-    const chartData = chart.chart_data as ChartData;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const chartRaw = chart as any;
+    const chartData = chartRaw.chart_data as ChartData;
     const sun = chartData.planets?.find(p => p.planet === "Sol");
     const moon = chartData.planets?.find(p => p.planet === "Lua");
     const birthInfo = [
-        chart.birth_place,
-        chart.birth_date && new Date(chart.birth_date).toLocaleDateString("pt-BR"),
-        chart.birth_time && `às ${chart.birth_time}`,
+        chartRaw.birth_place,
+        chartRaw.birth_date && new Date(chartRaw.birth_date).toLocaleDateString("pt-BR"),
+        chartRaw.birth_time && `às ${chartRaw.birth_time}`,
     ].filter(Boolean).join(" · ");
 
-    const interpretation = chart.full_interpretation ?? "";
+    const interpretation = (chartRaw.full_interpretation as string | null) ?? "";
 
     return (
         <html lang="pt-BR">
             <head>
                 <meta charSet="utf-8" />
                 <meta name="viewport" content="width=device-width, initial-scale=1" />
-                <title>Mapa Astral — {chart.name}</title>
+                <title>Mapa Astral — {chartRaw.name}</title>
                 <style>{`
                     * { box-sizing: border-box; margin: 0; padding: 0; }
                     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
@@ -217,7 +219,7 @@ export default async function ChartPrintPage({ params }: { params: Promise<{ id:
                                     .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
                                     .replace(/^- (.+)$/gm, '<li>$1</li>')
                                     .replace(/\n\n/g, '</p><p>')
-                                    .replace(/^([^<\n].+)$/gm, m => m.startsWith('<') ? m : `<p>${m}</p>`)
+                                    .replace(/^([^<\n].+)$/gm, (m: string) => m.startsWith('<') ? m : `<p>${m}</p>`)
                             }} />
                         </div>
                     )}
