@@ -176,7 +176,7 @@ export default function DashboardClient({ profile, charts, moodLogs, moonPhase }
                                 <p style={{ fontSize: 10, color: "#2d3e5a", letterSpacing: 3, textTransform: "uppercase", marginBottom: 12 }}>
                                     Mapa Natal — {firstName}
                                 </p>
-                                <MandalaChart />
+                                <MandalaChart data={charts[0]?.chart_data as any} />
                             </div>
 
                             {/* Quick actions */}

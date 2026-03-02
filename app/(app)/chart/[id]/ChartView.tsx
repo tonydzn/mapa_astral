@@ -94,7 +94,7 @@ export default function ChartView({ chart, profile }: Props) {
                 <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
                     <div className="card" style={{ padding: "20px 16px", textAlign: "center" }}>
                         <p style={{ fontSize: 10, color: "#2d3e5a", letterSpacing: 3, textTransform: "uppercase", marginBottom: 12 }}>Mapa Natal</p>
-                        <MandalaChart />
+                        <MandalaChart data={chartData} />
                         <div style={{ marginTop: 16, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
                             {[
                                 { label: "Ascendente", value: chartData.ascendant.sign, color: "#f59e0b" },
