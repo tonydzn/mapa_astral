@@ -1,11 +1,8 @@
 "use client";
-import { useState, useMemo } from "react";
-import Link from "next/link";
-import dynamic from "next/dynamic";
+import { useState } from "react";
 import MandalaChart from "@/components/astro/MandalaChart";
 import Header from "@/components/layout/Header";
 import PremiumModal from "@/components/checkout/PremiumModal";
-import PDFDownloadButton from "@/components/astro/PDFDownloadButton";
 import type { ChartData } from "@/lib/astro-engine";
 
 interface Chart {
@@ -191,15 +188,21 @@ export default function ChartView({ chart, profile }: Props) {
                                 </div>
                                 <div style={{ display: "flex", gap: 10 }}>
                                     {interpretation && (
-                                        <PDFDownloadButton
-                                            data={chartData}
-                                            userName={profile?.full_name || "Astronauta"}
-                                            interpretation={interpretation}
-                                            birthTitle={[chart.birth_place, chart.birth_date && new Date(chart.birth_date).toLocaleDateString("pt-BR"), chart.birth_time && `às ${chart.birth_time}`].filter(Boolean).join(" · ")}
-                                            chartName={chart.name || "meu-mapa"}
-                                            isPremium={isPremium}
-                                            onShowPremium={() => setShowPremium(true)}
-                                        />
+                                        isPremium ? (
+                                            <a
+                                                href={`/chart/${chart.id}/print`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="btn-ghost"
+                                                style={{ padding: "9px 18px", fontSize: 13, display: "flex", alignItems: "center", gap: 8 }}
+                                            >
+                                                🖨️ Imprimir PDF
+                                            </a>
+                                        ) : (
+                                            <button onClick={() => setShowPremium(true)} className="btn-ghost" style={{ padding: "9px 18px", fontSize: 13, display: "flex", alignItems: "center", gap: 8 }}>
+                                                🖨️ Imprimir PDF <span style={{ fontSize: 10, background: "rgba(245,158,11,.2)", color: "#f59e0b", padding: "2px 6px", borderRadius: 4, marginLeft: 6 }}>Premium</span>
+                                            </button>
+                                        )
                                     )}
                                     <button onClick={handleGenerate} disabled={generating} className="btn-gold" style={{ padding: "9px 18px", fontSize: 13 }}>
                                         {generating ? "⏳ Gerando..." : interpretation ? "🔄 Regenerar" : "✨ Gerar interpretação"}
