@@ -40,6 +40,7 @@ export async function createBirthChart(formData: {
         place: formData.birth_place,
     };
 
+    // Calula o mapa natal e insere no banco
     const chartData = calculateChart(birthData);
 
     const { data: chart, error } = await supabase
