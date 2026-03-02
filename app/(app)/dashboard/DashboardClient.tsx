@@ -150,13 +150,21 @@ export default function DashboardClient({ profile, charts, moodLogs, moonPhase }
 
                 {/* ===== OVERVIEW TAB ===== */}
                 {activeTab === "overview" && (
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1.7fr", gap: 20 }}>
+                    <div style={{
+                        display: "grid",
+                        gridTemplateColumns: typeof window !== "undefined" && window.innerWidth < 900 ? "1fr" : "1fr 1.7fr",
+                        gap: 20
+                    }}>
 
                         {/* LEFT COLUMN */}
                         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
 
                             {/* Stats cards */}
-                            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                            <div style={{
+                                display: "grid",
+                                gridTemplateColumns: typeof window !== "undefined" && window.innerWidth < 480 ? "1fr 1fr" : "repeat(auto-fit, minmax(130px, 1fr))",
+                                gap: 10
+                            }}>
                                 {[
                                     { icon: "🗺️", label: "Mapas", value: `${mapsCount}/${isPremium ? "∞" : mapsLimit}`, color: "#f59e0b" },
                                     { icon: moonPhase.emoji, label: "Fase Lunar", value: moonPhase.name.split(" ").slice(0, 2).join(" "), color: "#c4b5fd" },

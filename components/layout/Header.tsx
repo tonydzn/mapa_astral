@@ -52,18 +52,19 @@ export default function Header({
             borderBottom: "1px solid rgba(255,255,255,.05)",
             background: "rgba(2,6,23,.9)",
             backdropFilter: "blur(20px)",
-            padding: "0 24px"
+            padding: "0 16px" // Reduzido para mobile
         }}>
             <div style={{
                 maxWidth: 1200,
                 margin: "0 auto",
                 display: "flex",
                 alignItems: "center",
+                justifyContent: "space-between", // Melhor distribuição
                 gap: 12,
                 height: 60
             }}>
                 {/* Logo & Back button */}
-                <div style={{ display: "flex", alignItems: "center", gap: 12, marginRight: 20 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                     {showBack && (
                         <Link href="/dashboard" style={{
                             color: "#475569",
@@ -78,76 +79,71 @@ export default function Header({
                             ←
                         </Link>
                     )}
-                    <Link href="/dashboard" style={{ display: "flex", alignItems: "center", gap: 8, textDecoration: "none" }}>
+                    <Link href="/dashboard" style={{ display: "flex", alignItems: "center", gap: 6, textDecoration: "none" }}>
                         <span style={{ color: "#f59e0b", fontSize: 18, filter: "drop-shadow(0 0 8px rgba(245,158,11,.5))" }}>✦</span>
-                        <span style={{ color: "#f59e0b", fontWeight: 800, letterSpacing: 2, fontSize: 16 }}>Mapa Astral</span>
+                        <span style={{ color: "#f59e0b", fontWeight: 800, letterSpacing: 1, fontSize: 13, whiteSpace: "nowrap" }}>Mapa Astral</span>
                     </Link>
                 </div>
 
-                {/* Title and Subtitle (for pages like Chart) */}
+                {/* Title and Subtitle - Oculto em telas pequenas se houver tabs */}
                 {(title || subtitle) && (
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                        {title && <div style={{ fontWeight: 700, color: "#f1f5f9", fontSize: 15, lineHeight: 1.2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{title}</div>}
-                        {subtitle && <div style={{ color: "#334155", fontSize: 12, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{subtitle}</div>}
+                    <div style={{
+                        flex: 1,
+                        minWidth: 0,
+                        display: tabs && typeof window !== "undefined" && window.innerWidth < 640 ? "none" : "block"
+                    }}>
+                        {title && <div style={{ fontWeight: 700, color: "#f1f5f9", fontSize: 14, lineHeight: 1.2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{title}</div>}
+                        {subtitle && <div style={{ color: "#334155", fontSize: 11, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{subtitle}</div>}
                     </div>
                 )}
 
-                {/* Nav tabs */}
+                {/* Nav tabs - Scrollable on mobile */}
                 {tabs && onTabChange && (
-                    <nav style={{ display: "flex", gap: 2, flex: title ? undefined : 1 }}>
+                    <nav style={{
+                        display: "flex",
+                        gap: 4,
+                        flex: title ? undefined : 1,
+                        overflowX: "auto",
+                        msOverflowStyle: "none",
+                        scrollbarWidth: "none",
+                        padding: "4px 0"
+                    }}>
                         {tabs.map((tab) => (
                             <button
                                 key={tab.key}
                                 className={`nav-pill ${activeTab === tab.key ? "active" : ""}`}
                                 onClick={() => onTabChange(tab.key)}
+                                style={{ fontSize: 12 }}
                             >
-                                {tab.label}
+                                {tab.label.split(" ").pop()} {/* Mostra apenas a última palavra/emoji em mobile se necessário */}
                             </button>
                         ))}
                     </nav>
                 )}
 
-                {!tabs && !title && <div style={{ flex: 1 }} />}
-
                 {/* Right side */}
-                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
                     {!isPremium && onShowPremium && (
-                        <button onClick={onShowPremium} className="btn-gold" style={{ padding: "7px 14px", fontSize: 13, borderRadius: 8 }}>
-                            ✨ Premium
+                        <button onClick={onShowPremium} className="btn-gold" style={{ padding: "6px 10px", fontSize: 11, borderRadius: 8 }}>
+                            ✨ Up
                         </button>
                     )}
-                    {isPremium && <span className="badge-gold">✦ Premium</span>}
-                    <button
-                        onClick={handleLogout}
-                        style={{
-                            background: "none",
-                            border: "none",
-                            color: "#334155",
-                            cursor: "pointer",
-                            fontSize: 13,
-                            padding: "4px 8px",
-                            borderRadius: 6,
-                            transition: "color .2s",
-                            fontFamily: "inherit"
-                        }}
-                        onMouseEnter={e => (e.currentTarget.style.color = "#94a3b8")}
-                        onMouseLeave={e => (e.currentTarget.style.color = "#334155")}
-                    >
-                        Sair
-                    </button>
+                    {isPremium && <span className="badge-gold" style={{ display: typeof window !== "undefined" && window.innerWidth < 480 ? "none" : "inline-block" }}>✦ Premium</span>}
+
                     <div style={{
-                        width: 34,
-                        height: 34,
+                        width: 32,
+                        height: 32,
                         borderRadius: "50%",
                         background: "linear-gradient(135deg,#7c3aed,#f59e0b)",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
                         fontWeight: 700,
-                        fontSize: 14,
+                        fontSize: 13,
                         color: "#fff",
-                        flexShrink: 0
-                    }}>
+                        flexShrink: 0,
+                        cursor: "pointer"
+                    }} onClick={handleLogout} title="Sair">
                         {firstName[0]?.toUpperCase() || "A"}
                     </div>
                 </div>

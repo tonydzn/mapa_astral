@@ -104,7 +104,16 @@ export default function ChartView({ chart, profile }: Props) {
             />
 
             {/* ===== CONTENT ===== */}
-            <div style={{ maxWidth: 1200, margin: "0 auto", padding: "24px", display: "grid", gridTemplateColumns: "280px 1fr", gap: 20, position: "relative", zIndex: 1 }} className="animate-fade-in">
+            <div style={{
+                maxWidth: 1200,
+                margin: "0 auto",
+                padding: "24px",
+                display: "grid",
+                gridTemplateColumns: typeof window !== "undefined" && window.innerWidth < 850 ? "1fr" : "280px 1fr",
+                gap: 20,
+                position: "relative",
+                zIndex: 1
+            }} className="animate-fade-in">
 
                 {/* SIDEBAR — Mandala + ascendant */}
                 <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
