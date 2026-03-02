@@ -70,7 +70,7 @@ export default function PremiumModal({ onClose, userId }: Props) {
                 />
 
                 <div style={{ textAlign: "center", marginBottom: 14 }}>
-                    <span style={{ fontSize: 32, fontWeight: "bold", color: "white" }}>R$97</span>
+                    <span style={{ fontSize: 32, fontWeight: "bold", color: "white" }}>R$49,90</span>
                     <span style={{ color: "#64748b", fontSize: 13 }}> /pagamento único</span>
                 </div>
 

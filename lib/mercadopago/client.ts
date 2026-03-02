@@ -10,7 +10,7 @@ export const PLANS = {
     premium: {
         title: "Mapa Astral Premium",
         description: "Mapas ilimitados, PDF, Sinastria e Interpretação Avançada",
-        price: 97.0,
+        price: 49.90,
         currency: "BRL",
     },
 } as const;

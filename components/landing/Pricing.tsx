@@ -59,7 +59,7 @@ export default function Pricing() {
                         <div style={{ marginBottom: 20 }}>
                             <div style={{ color: "#f59e0b", fontSize: 13, fontWeight: 600, marginBottom: 8 }}>PREMIUM</div>
                             <div style={{ display: "flex", alignItems: "flex-end", gap: 8 }}>
-                                <div style={{ fontSize: 42, fontWeight: 800, color: "#fff" }}>R$97</div>
+                                <div style={{ fontSize: 42, fontWeight: 800, color: "#fff" }}>R$49,90</div>
                                 <div style={{ color: "#475569", fontSize: 13, marginBottom: 10 }}>pagamento único</div>
                             </div>
                             <div style={{ color: "#475569", fontSize: 13 }}>Acesso <strong style={{ color: "#f59e0b" }}>vitalício</strong></div>
