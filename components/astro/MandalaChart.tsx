@@ -69,7 +69,7 @@ export default function MandalaChart({ data, size = 320 }: Props) {
         };
     }, [isFullscreen]);
 
-    if (!mounted) return <div style={{ width: size, height: size }} />;
+    if (!mounted) return <div style={{ width: "100%", maxWidth: size, aspectRatio: "1", margin: "0 auto" }} />;
 
     const renderSVG = (s: number, full: boolean = false) => {
         const cx = s / 2;
@@ -239,7 +239,7 @@ export default function MandalaChart({ data, size = 320 }: Props) {
     };
 
     return (
-        <div style={{ position: "relative", width: size, margin: "0 auto" }}>
+        <div style={{ position: "relative", width: "100%", maxWidth: size, margin: "0 auto" }}>
             {/* Tooltip Overlay */}
             <AnimatePresence>
                 {hoveredPlanet && (
