@@ -168,6 +168,25 @@ export default function NewChartPage() {
                         {error && (
                             <div style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.3)", borderRadius: 8, padding: "12px 16px", color: "#ef4444", fontSize: 13 }}>
                                 {error}
+                                {error.includes("limite") && (
+                                    <Link
+                                        href="/checkout"
+                                        style={{
+                                            display: "block",
+                                            marginTop: 10,
+                                            background: "linear-gradient(135deg,#f59e0b,#d97706)",
+                                            color: "#000",
+                                            fontWeight: 700,
+                                            fontSize: 13,
+                                            textAlign: "center",
+                                            padding: "10px 16px",
+                                            borderRadius: 8,
+                                            textDecoration: "none",
+                                        }}
+                                    >
+                                        ⭐ Tornar-se Premium
+                                    </Link>
+                                )}
                             </div>
                         )}
 
@@ -178,6 +197,55 @@ export default function NewChartPage() {
                         <p style={{ textAlign: "center", fontSize: 12, color: "#475569" }}>
                             Calculado instantaneamente com base nas posições astronômicas reais
                         </p>
+
+                        <div style={{ display: "flex", gap: 12, marginTop: 8 }}>
+                            <Link
+                                href="/dashboard"
+                                style={{
+                                    flex: 1,
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    gap: 6,
+                                    padding: "11px 16px",
+                                    borderRadius: 10,
+                                    border: "1px solid #334155",
+                                    background: "rgba(255,255,255,0.04)",
+                                    color: "#94a3b8",
+                                    fontSize: 14,
+                                    fontWeight: 500,
+                                    textDecoration: "none",
+                                    transition: "background 0.2s",
+                                }}
+                                onMouseEnter={e => (e.currentTarget.style.background = "rgba(255,255,255,0.08)")}
+                                onMouseLeave={e => (e.currentTarget.style.background = "rgba(255,255,255,0.04)")}
+                            >
+                                ← Voltar
+                            </Link>
+
+                            <Link
+                                href="/checkout"
+                                style={{
+                                    flex: 1,
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    gap: 6,
+                                    padding: "11px 16px",
+                                    borderRadius: 10,
+                                    background: "linear-gradient(135deg,#7c3aed,#4f46e5)",
+                                    color: "#fff",
+                                    fontSize: 14,
+                                    fontWeight: 600,
+                                    textDecoration: "none",
+                                    transition: "opacity 0.2s",
+                                }}
+                                onMouseEnter={e => (e.currentTarget.style.opacity = "0.85")}
+                                onMouseLeave={e => (e.currentTarget.style.opacity = "1")}
+                            >
+                                ⭐ Tornar-se Premium
+                            </Link>
+                        </div>
                     </form>
                 </div>
             </main>
