@@ -5,6 +5,7 @@ import { createBirthChart } from "@/actions/chart.actions";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Header from "@/components/layout/Header";
+import PremiumModal from "@/components/checkout/PremiumModal";
 
 interface GeoResult {
     display_name: string;
@@ -21,6 +22,7 @@ export default function NewChartPage() {
     const [suggestions, setSuggestions] = useState<GeoResult[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
+    const [showPremium, setShowPremium] = useState(false);
 
     async function searchCity(query: string) {
         if (query.length < 3) { setSuggestions([]); return; }
@@ -84,7 +86,10 @@ export default function NewChartPage() {
                 showBack={true}
                 title="Novo Mapa Astral"
                 profile={null} // O perfil será carregado via hook se necessário, ou podemos passar um prop
+                onShowPremium={() => setShowPremium(true)}
             />
+
+            {showPremium && <PremiumModal onClose={() => setShowPremium(false)} userId="" />}
 
             <main style={{ maxWidth: 560, margin: "0 auto", padding: "40px 24px", position: "relative", zIndex: 10 }}>
                 <div style={{ textAlign: "center", marginBottom: 32 }}>
@@ -169,10 +174,12 @@ export default function NewChartPage() {
                             <div style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.3)", borderRadius: 8, padding: "12px 16px", color: "#ef4444", fontSize: 13 }}>
                                 {error}
                                 {error.includes("limite") && (
-                                    <Link
-                                        href="/checkout"
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPremium(true)}
                                         style={{
                                             display: "block",
+                                            width: "100%",
                                             marginTop: 10,
                                             background: "linear-gradient(135deg,#f59e0b,#d97706)",
                                             color: "#000",
@@ -181,11 +188,12 @@ export default function NewChartPage() {
                                             textAlign: "center",
                                             padding: "10px 16px",
                                             borderRadius: 8,
-                                            textDecoration: "none",
+                                            border: "none",
+                                            cursor: "pointer",
                                         }}
                                     >
                                         ⭐ Tornar-se Premium
-                                    </Link>
+                                    </button>
                                 )}
                             </div>
                         )}
@@ -223,8 +231,9 @@ export default function NewChartPage() {
                                 ← Voltar
                             </Link>
 
-                            <Link
-                                href="/checkout"
+                            <button
+                                type="button"
+                                onClick={() => setShowPremium(true)}
                                 style={{
                                     flex: 1,
                                     display: "flex",
@@ -233,18 +242,19 @@ export default function NewChartPage() {
                                     gap: 6,
                                     padding: "11px 16px",
                                     borderRadius: 10,
+                                    border: "none",
+                                    cursor: "pointer",
                                     background: "linear-gradient(135deg,#7c3aed,#4f46e5)",
                                     color: "#fff",
                                     fontSize: 14,
                                     fontWeight: 600,
-                                    textDecoration: "none",
                                     transition: "opacity 0.2s",
                                 }}
                                 onMouseEnter={e => (e.currentTarget.style.opacity = "0.85")}
                                 onMouseLeave={e => (e.currentTarget.style.opacity = "1")}
                             >
                                 ⭐ Tornar-se Premium
-                            </Link>
+                            </button>
                         </div>
                     </form>
                 </div>
