@@ -125,7 +125,7 @@ export default function Header({
                 <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
                     {!isPremium && onShowPremium && (
                         <button onClick={onShowPremium} className="btn-gold" style={{ padding: "6px 10px", fontSize: 11, borderRadius: 8 }}>
-                            ✨ Up
+                            ✨ Tornar-se premium
                         </button>
                     )}
                     {isPremium && <span className="badge-gold" style={{ display: typeof window !== "undefined" && window.innerWidth < 480 ? "none" : "inline-block" }}>✦ Premium</span>}
