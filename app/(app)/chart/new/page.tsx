@@ -82,7 +82,7 @@ export default function NewChartPage() {
 
             <Header
                 showBack={true}
-                title="Novo Mapa Natal"
+                title="Novo Mapa Astral"
                 profile={null} // O perfil será carregado via hook se necessário, ou podemos passar um prop
             />
 
@@ -90,7 +90,7 @@ export default function NewChartPage() {
                 <div style={{ textAlign: "center", marginBottom: 32 }}>
                     <div style={{ fontSize: 48, marginBottom: 12 }}>🌌</div>
                     <h2 style={{ fontSize: 24, fontWeight: "bold", color: "white", marginBottom: 8 }}>
-                        Criar Mapa Natal
+                        Criar Mapa Astral
                     </h2>
                     <p style={{ color: "#64748b", fontSize: 14 }}>
                         Insira os dados de nascimento para calcular as posições planetárias exatas
