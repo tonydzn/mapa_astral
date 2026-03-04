@@ -107,7 +107,9 @@ export default async function CustomersPage({
                                             {p.is_admin && <span style={{ marginLeft: 6, background: "rgba(139,92,246,.15)", color: "#c4b5fd", borderRadius: 99, fontSize: 10, padding: "1px 8px", fontWeight: 600, display: "inline-block" }}>Admin</span>}
                                         </td>
                                         <td style={{ padding: "12px 16px", color: "#94a3b8" }}>{p.maps_count} / {p.maps_limit}</td>
-                                        <td style={{ padding: "12px 16px", color: "#475569", fontSize: 12 }}>{p.created_at ? new Date(p.created_at).toLocaleDateString("pt-BR") : "—"}</td>
+                                        <td style={{ padding: "12px 16px", color: "#475569", fontSize: 12 }} suppressHydrationWarning>
+                                            {p.created_at ? new Date(p.created_at).toLocaleDateString("pt-BR") : "—"}
+                                        </td>
                                         <td style={{ padding: "12px 16px" }}>
                                             <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                                                 <Link href={`/admin/customers/${p.id}`} className="btn-ghost" style={{ padding: "5px 12px", fontSize: 12 }}>

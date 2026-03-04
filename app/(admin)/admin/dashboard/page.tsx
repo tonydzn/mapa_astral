@@ -156,7 +156,9 @@ export default async function AdminDashboardPage() {
                                                 borderRadius: 99, fontSize: 11, padding: "2px 10px", fontWeight: 600
                                             }}>{statusLabel[order.status] ?? order.status}</span>
                                         </td>
-                                        <td style={{ padding: "10px 12px", color: "#475569", fontSize: 12 }}>{order.created_at ? new Date(order.created_at).toLocaleDateString("pt-BR") : "—"}</td>
+                                        <td style={{ padding: "10px 12px", color: "#475569", fontSize: 12 }} suppressHydrationWarning>
+                                            {order.created_at ? new Date(order.created_at).toLocaleDateString("pt-BR") : "—"}
+                                        </td>
                                         <td style={{ padding: "10px 12px", textAlign: "right" }}>
                                             <form action={async () => {
                                                 "use server";

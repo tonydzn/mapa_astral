@@ -133,7 +133,7 @@ export default async function PlansPage() {
                                             </td>
                                             <td style={{ padding: "10px 14px", color: "#10b981", fontWeight: 600 }}>{c.discount_percent}%</td>
                                             <td style={{ padding: "10px 14px", color: "#94a3b8" }}>{c.uses_count}{c.max_uses ? ` / ${c.max_uses}` : ""}</td>
-                                            <td style={{ padding: "10px 14px", color: "#475569", fontSize: 12 }}>
+                                            <td style={{ padding: "10px 14px", color: "#475569", fontSize: 12 }} suppressHydrationWarning>
                                                 {c.expires_at ? new Date(c.expires_at).toLocaleDateString("pt-BR") : "—"}
                                             </td>
                                             <td style={{ padding: "10px 14px" }}>
