@@ -1,6 +1,10 @@
 import { getProfileById, updateProfile, deleteProfile, upgradeToPremium, downgradePlan } from "@/actions/admin.actions";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import type { Database } from "@/types/database.types";
+
+type ProfileRow = Database["public"]["Tables"]["profiles"]["Row"];
+
 
 function AdminSidebar() {
     return (
@@ -35,7 +39,8 @@ function AdminSidebar() {
 
 export default async function CustomerDetailPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
-    const { profile, charts, orders } = await getProfileById(id);
+    const { profile: profileRaw, charts, orders } = await getProfileById(id);
+    const profile = profileRaw as ProfileRow | null;
 
     if (!profile) redirect("/admin/customers");
 

@@ -23,28 +23,17 @@ export async function middleware(request: NextRequest) {
 
     const { data: { user } } = await supabase.auth.getUser();
 
-    // ─── Admin route protection ────────────────────────────────
+    // ─── Admin route protection (auth check only — is_admin checked in layout) ─
     if (pathname.startsWith("/admin") && pathname !== "/admin/login") {
         if (!user) {
             return NextResponse.redirect(new URL("/admin/login", request.url));
         }
-
-        // Check admin flag in profiles
-        const { data: profile } = await supabase
-            .from("profiles")
-            .select("is_admin")
-            .eq("id", user.id)
-            .single();
-
-        if (!profile?.is_admin) {
-            return NextResponse.redirect(new URL("/admin/login", request.url));
-        }
     }
 
-    // ─── App route protection ──────────────────────────────────
-    const appRoutes = ["/dashboard", "/chart"];
-    const isAppRoute = appRoutes.some(r => pathname.startsWith(r));
-    if (isAppRoute && !user) {
+    // ─── App route protection ──────────────────────────────────────────────────
+    const protectedPrefixes = ["/dashboard", "/chart"];
+    const isProtected = protectedPrefixes.some(p => pathname.startsWith(p));
+    if (isProtected && !user) {
         return NextResponse.redirect(new URL("/login", request.url));
     }
 
