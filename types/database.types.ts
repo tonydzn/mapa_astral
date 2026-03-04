@@ -16,6 +16,7 @@ export type Database = {
                     full_name: string | null
                     avatar_url: string | null
                     is_premium: boolean
+                    is_admin: boolean
                     maps_count: number
                     maps_limit: number
                     birth_data: Json
@@ -28,6 +29,7 @@ export type Database = {
                     full_name?: string | null
                     avatar_url?: string | null
                     is_premium?: boolean
+                    is_admin?: boolean
                     maps_count?: number
                     maps_limit?: number
                     birth_data?: Json
@@ -40,6 +42,7 @@ export type Database = {
                     full_name?: string | null
                     avatar_url?: string | null
                     is_premium?: boolean
+                    is_admin?: boolean
                     maps_count?: number
                     maps_limit?: number
                     birth_data?: Json
