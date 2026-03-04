@@ -95,11 +95,21 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
                                 full_name: formData.get("full_name") as string,
                                 maps_limit: parseInt(formData.get("maps_limit") as string ?? "1"),
                                 maps_count: parseInt(formData.get("maps_count") as string ?? "0"),
+                                is_premium: formData.get("plan") === "premium",
                             });
                         }} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-                            <div>
-                                <label style={{ display: "block", color: "#64748b", fontSize: 12, marginBottom: 6 }}>Nome completo</label>
-                                <input name="full_name" defaultValue={profile.full_name ?? ""} className="input-dark" style={{ fontSize: 13 }} />
+                            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                                <div>
+                                    <label style={{ display: "block", color: "#64748b", fontSize: 12, marginBottom: 6 }}>Nome completo</label>
+                                    <input name="full_name" defaultValue={profile.full_name ?? ""} className="input-dark" style={{ fontSize: 13 }} />
+                                </div>
+                                <div>
+                                    <label style={{ display: "block", color: "#64748b", fontSize: 12, marginBottom: 6 }}>Plano do usuário</label>
+                                    <select name="plan" defaultValue={profile.is_premium ? "premium" : "free"} className="input-dark" style={{ fontSize: 13, width: "100%" }}>
+                                        <option value="free">🆓 Free</option>
+                                        <option value="premium">✨ Premium</option>
+                                    </select>
+                                </div>
                             </div>
                             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                                 <div>
