@@ -81,16 +81,15 @@ export default function Header({
                     )}
                     <Link href="/dashboard" style={{ display: "flex", alignItems: "center", gap: 6, textDecoration: "none" }}>
                         <span style={{ color: "#f59e0b", fontSize: 18, filter: "drop-shadow(0 0 8px rgba(245,158,11,.5))" }}>✦</span>
-                        <span style={{ color: "#f59e0b", fontWeight: 800, letterSpacing: 1, fontSize: 13, whiteSpace: "nowrap" }}>Mapa Astral</span>
+                        <span className="hidden sm:inline-block" style={{ color: "#f59e0b", fontWeight: 800, letterSpacing: 1, fontSize: 13, whiteSpace: "nowrap" }}>Mapa Astral</span>
                     </Link>
                 </div>
 
                 {/* Title and Subtitle - Oculto em telas pequenas se houver tabs */}
                 {(title || subtitle) && (
-                    <div style={{
+                    <div className={tabs ? "hidden sm:block" : "block"} style={{
                         flex: 1,
                         minWidth: 0,
-                        display: tabs && typeof window !== "undefined" && window.innerWidth < 640 ? "none" : "block"
                     }}>
                         {title && <div style={{ fontWeight: 700, color: "#f1f5f9", fontSize: 14, lineHeight: 1.2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{title}</div>}
                         {subtitle && <div style={{ color: "#334155", fontSize: 11, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{subtitle}</div>}
@@ -125,10 +124,11 @@ export default function Header({
                 <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
                     {!isPremium && onShowPremium && (
                         <button onClick={onShowPremium} className="btn-gold" style={{ padding: "6px 10px", fontSize: 11, borderRadius: 8 }}>
-                            ✨ Tornar-se premium
+                            <span className="hidden sm:inline">✨ Tornar-se premium</span>
+                            <span className="sm:hidden">✨ Premium</span>
                         </button>
                     )}
-                    {isPremium && <span className="badge-gold" style={{ display: typeof window !== "undefined" && window.innerWidth < 480 ? "none" : "inline-block" }}>✦ Premium</span>}
+                    {isPremium && <span className="badge-gold hidden min-[480px]:inline-block">✦ Premium</span>}
 
                     <div style={{
                         width: 32,

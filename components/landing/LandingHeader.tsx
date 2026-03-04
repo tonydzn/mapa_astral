@@ -12,10 +12,9 @@ export default function LandingHeader() {
             background: "rgba(2,6,23,.85)",
             backdropFilter: "blur(20px)"
         }}>
-            <div style={{
+            <div className="px-4 sm:px-6 py-3 sm:py-4" style={{
                 maxWidth: 1140,
                 margin: "0 auto",
-                padding: "14px 24px",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "space-between"
@@ -33,8 +32,14 @@ export default function LandingHeader() {
                 </nav>
 
                 <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-                    <Link href="/login" className="btn-ghost" style={{ padding: "8px 16px", fontSize: 13 }}>Entrar</Link>
-                    <Link href="/register" className="btn-gold" style={{ padding: "9px 18px", fontSize: 13 }}>Começar grátis →</Link>
+                    <Link href="/login" className="btn-ghost" style={{ padding: "8px 16px", fontSize: 13 }}>
+                        <span className="hidden sm:inline">Entrar</span>
+                        <span className="sm:hidden">Login</span>
+                    </Link>
+                    <Link href="/register" className="btn-gold" style={{ padding: "9px 18px", fontSize: 13 }}>
+                        <span className="hidden sm:inline">Começar grátis →</span>
+                        <span className="sm:hidden">Começar</span>
+                    </Link>
                 </div>
             </div>
         </header>
