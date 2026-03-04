@@ -588,6 +588,23 @@ main {
   animation: fadeIn .4s ease;
 }
 
+/* ===== Landing Header (isolado do inline style) ===== */
+.landing-nav-center {
+  display: none;
+  /* hidden on mobile by default */
+  gap: 28px;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  align-items: center;
+}
+
+@media (min-width: 768px) {
+  .landing-nav-center {
+    display: flex;
+  }
+}
+
 /* ===== Mobile Responsiveness ===== */
 @media (max-width: 900px) {
   .card {
