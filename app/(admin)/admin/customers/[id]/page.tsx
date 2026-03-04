@@ -131,8 +131,8 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
                         {[
                             { label: "Plano", value: profile.is_premium ? "✨ Premium" : "🆓 Free" },
                             { label: "Mapas", value: `${profile.maps_count} / ${profile.maps_limit}` },
-                            { label: "Cadastrado em", value: new Date(profile.created_at).toLocaleDateString("pt-BR") },
-                            { label: "Última atualização", value: new Date(profile.updated_at).toLocaleDateString("pt-BR") },
+                            { label: "Cadastrado em", value: profile.created_at ? new Date(profile.created_at).toLocaleDateString("pt-BR") : "—" },
+                            { label: "Última atualização", value: profile.updated_at ? new Date(profile.updated_at).toLocaleDateString("pt-BR") : "—" },
                             { label: "ID", value: id.slice(0, 12) + "..." },
                         ].map(row => (
                             <div key={row.label} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 0", borderBottom: "1px solid rgba(255,255,255,.04)" }}>
@@ -154,7 +154,7 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
                                         <div style={{ color: "#f1f5f9", fontSize: 13, fontWeight: 500 }}>{c.name ?? "Sem nome"}</div>
                                         <div style={{ color: "#475569", fontSize: 11, marginTop: 2 }}>{c.birth_date} · {c.birth_place ?? "—"}</div>
                                     </div>
-                                    <span style={{ color: "#475569", fontSize: 11 }}>{new Date(c.created_at).toLocaleDateString("pt-BR")}</span>
+                                    <span style={{ color: "#475569", fontSize: 11 }}>{c.created_at ? new Date(c.created_at).toLocaleDateString("pt-BR") : "—"}</span>
                                 </div>
                             ))}
                         </div>
@@ -170,7 +170,7 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
                                 <div key={o.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 14px", background: "rgba(255,255,255,.03)", borderRadius: 8 }}>
                                     <div>
                                         <div style={{ color: "#f1f5f9", fontSize: 13, fontWeight: 500 }}>{o.plan}</div>
-                                        <div style={{ color: "#475569", fontSize: 11, marginTop: 2 }}>{new Date(o.created_at).toLocaleDateString("pt-BR")}</div>
+                                        <div style={{ color: "#475569", fontSize: 11, marginTop: 2 }}>{o.created_at ? new Date(o.created_at).toLocaleDateString("pt-BR") : "—"}</div>
                                     </div>
                                     <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
                                         <div style={{ textAlign: "right" }}>
