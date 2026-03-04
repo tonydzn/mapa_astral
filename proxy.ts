@@ -27,6 +27,16 @@ export async function proxy(request: NextRequest) {
     const { data: { user } } = await supabase.auth.getUser();
     const path = request.nextUrl.pathname;
 
+    // ─── Admin route protection ───────────────────────────────────────────
+    if (path.startsWith("/admin") && path !== "/admin/login") {
+        if (!user) {
+            const url = request.nextUrl.clone();
+            url.pathname = "/admin/login";
+            return NextResponse.redirect(url);
+        }
+    }
+
+    // ─── App route protection ─────────────────────────────────────────────
     const isProtected = PROTECTED_ROUTES.some(r => path.startsWith(r));
     if (isProtected && !user) {
         const url = request.nextUrl.clone();
@@ -35,6 +45,7 @@ export async function proxy(request: NextRequest) {
         return NextResponse.redirect(url);
     }
 
+    // ─── Redirect logged-in users away from auth pages ───────────────────
     const isAuthRoute = AUTH_ROUTES.some(r => path.startsWith(r));
     if (isAuthRoute && user) {
         const url = request.nextUrl.clone();
