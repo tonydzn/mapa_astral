@@ -14,7 +14,7 @@ async function requireAdmin() {
         .from("profiles")
         .select("is_admin")
         .eq("id", user.id)
-        .single();
+        .maybeSingle();
 
     if (!profile?.is_admin) throw new Error("Acesso negado");
     return user;
@@ -35,8 +35,8 @@ export async function getAdminStats() {
             .gte("created_at", new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString()),
     ]);
 
-    const totalRevenue = (ordersRes.data ?? []).reduce((s, o) => s + (o.amount ?? 0), 0);
-    const monthRevenue = (monthOrdersRes.data ?? []).reduce((s, o) => s + (o.amount ?? 0), 0);
+    const totalRevenue = (ordersRes.data || []).reduce((s, o) => s + (o.amount || 0), 0);
+    const monthRevenue = (monthOrdersRes.data || []).reduce((s, o) => s + (o.amount || 0), 0);
 
     // Build last 30 days chart data
     const now = new Date();
@@ -45,9 +45,9 @@ export async function getAdminStats() {
         const d = new Date(now);
         d.setDate(d.getDate() - i);
         const dateStr = d.toISOString().slice(0, 10);
-        const revenue = (ordersRes.data ?? [])
-            .filter(o => o.created_at.slice(0, 10) === dateStr)
-            .reduce((s, o) => s + (o.amount ?? 0), 0);
+        const revenue = (ordersRes.data || [])
+            .filter(o => o?.created_at && o.created_at.slice(0, 10) === dateStr)
+            .reduce((s, o) => s + (o.amount || 0), 0);
         days.push({ date: dateStr, revenue });
     }
 
@@ -84,7 +84,7 @@ export async function getProfileById(id: string) {
     const admin = createAdminClient();
 
     const [profileRes, chartsRes, ordersRes] = await Promise.all([
-        admin.from("profiles").select("*").eq("id", id).single(),
+        admin.from("profiles").select("*").eq("id", id).maybeSingle(),
         admin.from("birth_charts").select("id, name, birth_date, birth_place, created_at").eq("user_id", id).order("created_at", { ascending: false }),
         admin.from("orders").select("*").eq("user_id", id).order("created_at", { ascending: false }),
     ]);
