@@ -64,7 +64,7 @@ export default function Footer() {
 
                 {/* Bottom Bar */}
                 <div style={{ borderTop: "1px solid rgba(255,255,255,.03)", paddingTop: 30, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 20 }}>
-                    <p style={{ color: "#334155", fontSize: 12, margin: 0 }}>
+                    <p style={{ color: "#334155", fontSize: 12, margin: 0 }} suppressHydrationWarning>
                         &copy; {new Date().getFullYear()} Mapa Astral. Todos os direitos reservados.
                     </p>
                     <p style={{ color: "#334155", fontSize: 12, margin: 0, display: "flex", alignItems: "center", gap: 6 }}>

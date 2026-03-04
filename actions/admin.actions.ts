@@ -4,11 +4,13 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 
+import { redirect } from "next/navigation";
+
 // ─── Auth guard ────────────────────────────────────────────────────────────
 async function requireAdmin() {
     const supabase = await createServerSupabaseClient();
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) throw new Error("Não autenticado");
+    if (!user) redirect("/admin/login");
 
     const { data: profile } = await supabase
         .from("profiles")
@@ -16,7 +18,7 @@ async function requireAdmin() {
         .eq("id", user.id)
         .maybeSingle();
 
-    if (!profile?.is_admin) throw new Error("Acesso negado");
+    if (!profile?.is_admin) redirect("/admin/login");
     return user;
 }
 

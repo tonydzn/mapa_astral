@@ -139,7 +139,7 @@ export default function DashboardClient({ profile, charts, moodLogs, moonPhase }
 
                 {/* Greeting */}
                 <div style={{ marginBottom: 28 }}>
-                    <p style={{ color: "#475569", fontSize: 13, marginBottom: 4 }}>
+                    <p style={{ color: "#475569", fontSize: 13, marginBottom: 4 }} suppressHydrationWarning>
                         {moonPhase.emoji} {moonPhase.name} &nbsp;·&nbsp; {new Date().toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long" })}
                     </p>
                     <h1 style={{ fontSize: 28, fontWeight: 800, color: "#fff", margin: 0 }}>
@@ -245,7 +245,7 @@ export default function DashboardClient({ profile, charts, moodLogs, moonPhase }
                                                     <div style={{ width: 42, height: 42, borderRadius: "50%", border: "1px solid rgba(245,158,11,.35)", background: "rgba(245,158,11,.08)", display: "flex", alignItems: "center", justifyContent: "center", color: "#f59e0b", fontSize: 18, flexShrink: 0 }}>✦</div>
                                                     <div style={{ flex: 1, minWidth: 0 }}>
                                                         <div style={{ fontWeight: 600, color: "#f1f5f9", fontSize: 14, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.name || "Mapa sem nome"}</div>
-                                                        <div style={{ fontSize: 11, color: "#334155", marginTop: 2 }}>{c.birth_place} · {new Date(c.birth_date).toLocaleDateString("pt-BR")}</div>
+                                                        <div style={{ fontSize: 11, color: "#334155", marginTop: 2 }} suppressHydrationWarning>{c.birth_place} · {new Date(c.birth_date).toLocaleDateString("pt-BR")}</div>
                                                     </div>
                                                     <span style={{ color: "#2d3e5a", fontSize: 13, flexShrink: 0 }}>→</span>
                                                 </div>
@@ -334,7 +334,7 @@ export default function DashboardClient({ profile, charts, moodLogs, moonPhase }
                                             <div style={{ fontSize: 32, marginBottom: 12, textAlign: "center" }}>✦</div>
                                             <div style={{ fontWeight: 700, color: "#f1f5f9", fontSize: 15, textAlign: "center", marginBottom: 6 }}>{c.name || "Mapa sem nome"}</div>
                                             <div style={{ fontSize: 12, color: "#334155", textAlign: "center" }}>{c.birth_place}</div>
-                                            <div style={{ fontSize: 11, color: "#2d3e5a", textAlign: "center", marginTop: 2 }}>{new Date(c.birth_date).toLocaleDateString("pt-BR")}</div>
+                                            <div style={{ fontSize: 11, color: "#2d3e5a", textAlign: "center", marginTop: 2 }} suppressHydrationWarning>{new Date(c.birth_date).toLocaleDateString("pt-BR")}</div>
                                         </div>
                                     </Link>
                                 ))}
