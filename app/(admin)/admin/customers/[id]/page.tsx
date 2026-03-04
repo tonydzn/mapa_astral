@@ -1,4 +1,4 @@
-import { getProfileById, updateProfile, deleteProfile, upgradeToPremium, downgradePlan } from "@/actions/admin.actions";
+import { getProfileById, updateProfile, deleteProfile, upgradeToPremium, downgradePlan, deleteOrder } from "@/actions/admin.actions";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import type { Database } from "@/types/database.types";
@@ -162,9 +162,20 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
                                         <div style={{ color: "#f1f5f9", fontSize: 13, fontWeight: 500 }}>{o.plan}</div>
                                         <div style={{ color: "#475569", fontSize: 11, marginTop: 2 }}>{new Date(o.created_at).toLocaleDateString("pt-BR")}</div>
                                     </div>
-                                    <div style={{ textAlign: "right" }}>
-                                        <div style={{ color: "#10b981", fontWeight: 600, fontSize: 13 }}>R$ {(o.amount ?? 0).toFixed(2)}</div>
-                                        <div style={{ color: statusColor[o.status] ?? "#475569", fontSize: 11 }}>{o.status}</div>
+                                    <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+                                        <div style={{ textAlign: "right" }}>
+                                            <div style={{ color: "#10b981", fontWeight: 600, fontSize: 13 }}>R$ {(o.amount ?? 0).toFixed(2)}</div>
+                                            <div style={{ color: statusColor[o.status] ?? "#475569", fontSize: 11 }}>{o.status}</div>
+                                        </div>
+                                        <form action={async () => {
+                                            "use server";
+                                            await deleteOrder(o.id);
+                                        }}>
+                                            <button type="submit" className="btn-ghost" style={{ padding: "4px 8px", fontSize: 13, color: "#ef4444" }}
+                                                onClick={(e) => { if (!confirm("Apagar pedido permanentemente?")) e.preventDefault(); }}>
+                                                🗑
+                                            </button>
+                                        </form>
                                     </div>
                                 </div>
                             ))}

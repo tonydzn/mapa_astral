@@ -157,6 +157,17 @@ export async function getOrders(limit = 50) {
     return data ?? [];
 }
 
+export async function deleteOrder(id: string) {
+    await requireAdmin();
+    const admin = createAdminClient();
+    const { error } = await admin.from("orders").delete().eq("id", id);
+    if (error) return { error: error.message };
+
+    revalidatePath("/admin/dashboard");
+    revalidatePath("/admin/customers");
+    return { success: true };
+}
+
 // ─── Coupons ───────────────────────────────────────────────────────────────
 export async function getCoupons() {
     await requireAdmin();

@@ -1,4 +1,4 @@
-import { getAdminStats, getOrders } from "@/actions/admin.actions";
+import { getAdminStats, getOrders, deleteOrder } from "@/actions/admin.actions";
 import Link from "next/link";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
@@ -132,7 +132,7 @@ export default async function AdminDashboardPage() {
                         <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
                             <thead>
                                 <tr>
-                                    {["Cliente", "Plano", "Valor", "Status", "Data"].map(h => (
+                                    {["Cliente", "Plano", "Valor", "Status", "Data", ""].map(h => (
                                         <th key={h} style={{ color: "#475569", fontWeight: 500, textAlign: "left", padding: "6px 12px", borderBottom: "1px solid #1a2540" }}>{h}</th>
                                     ))}
                                 </tr>
@@ -157,6 +157,17 @@ export default async function AdminDashboardPage() {
                                             }}>{statusLabel[order.status] ?? order.status}</span>
                                         </td>
                                         <td style={{ padding: "10px 12px", color: "#475569", fontSize: 12 }}>{new Date(order.created_at).toLocaleDateString("pt-BR")}</td>
+                                        <td style={{ padding: "10px 12px", textAlign: "right" }}>
+                                            <form action={async () => {
+                                                "use server";
+                                                await deleteOrder(order.id);
+                                            }}>
+                                                <button type="submit" className="btn-ghost" style={{ padding: "4px 8px", fontSize: 12, color: "#ef4444" }}
+                                                    onClick={(e) => { if (!confirm("Tem certeza que deseja apagar este pedido?")) e.preventDefault(); }}>
+                                                    🗑
+                                                </button>
+                                            </form>
+                                        </td>
                                     </tr>
                                 ))}
                             </tbody>
