@@ -1,5 +1,5 @@
 import { createAdminClient } from "@/lib/supabase/admin";
-import { revalidatePath } from "next/cache";
+import { createCouponAction, toggleCouponAction, deleteCouponAction } from "@/actions/admin.actions";
 import Link from "next/link";
 
 function AdminSidebar() {
@@ -51,11 +51,11 @@ export default async function PlansPage() {
                     <p style={{ color: "#475569", fontSize: 13, marginTop: 4 }}>Gerencie preços e cupons de desconto</p>
                 </div>
 
-                {/* Plans info section */}
+                {/* Plans info */}
                 <div className="card" style={{ padding: 24, marginBottom: 24 }}>
                     <h2 style={{ color: "#f1f5f9", fontWeight: 700, fontSize: 16, marginBottom: 6 }}>💎 Planos Disponíveis</h2>
                     <p style={{ color: "#475569", fontSize: 13, marginBottom: 20 }}>
-                        Para alterar os preços, edite as variáveis de ambiente no Vercel ou no <code style={{ color: "#94a3b8", background: "rgba(255,255,255,.06)", padding: "1px 6px", borderRadius: 4 }}>.env.local</code>.
+                        Para alterar os preços, edite as variáveis de ambiente no Vercel.
                     </p>
                     <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 16 }}>
                         {plans.map(plan => (
@@ -76,22 +76,7 @@ export default async function PlansPage() {
                 {/* Create coupon form */}
                 <div className="card" style={{ padding: 24, marginBottom: 24 }}>
                     <h2 style={{ color: "#f1f5f9", fontWeight: 700, fontSize: 16, marginBottom: 20 }}>🎟️ Criar Cupom de Desconto</h2>
-                    <form action={async (formData: FormData) => {
-                        "use server";
-                        const admin = createAdminClient();
-                        const code = (formData.get("code") as string).toUpperCase();
-                        const discount = parseFloat(formData.get("discount") as string);
-                        const maxUsesRaw = formData.get("max_uses") as string;
-                        const expiresAtRaw = formData.get("expires_at") as string;
-                        await admin.from("coupons").insert({
-                            code,
-                            discount_percent: discount,
-                            max_uses: maxUsesRaw ? parseInt(maxUsesRaw) : null,
-                            expires_at: expiresAtRaw || null,
-                            active: true,
-                        });
-                        revalidatePath("/admin/plans");
-                    }} style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 16, alignItems: "end" }}>
+                    <form action={createCouponAction} style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 16, alignItems: "end" }}>
                         <div>
                             <label style={{ display: "block", color: "#64748b", fontSize: 12, marginBottom: 6 }}>Código do cupom*</label>
                             <input name="code" required placeholder="PROMO10" className="input-dark" style={{ fontSize: 13, textTransform: "uppercase" }} />
@@ -134,47 +119,41 @@ export default async function PlansPage() {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {coupons.map((c: any) => (
-                                        <tr key={c.id} style={{ borderBottom: "1px solid rgba(255,255,255,.03)" }}>
-                                            <td style={{ padding: "10px 14px" }}>
-                                                <code style={{ color: "#f59e0b", background: "rgba(245,158,11,.08)", padding: "2px 8px", borderRadius: 4, fontSize: 12 }}>{c.code}</code>
-                                            </td>
-                                            <td style={{ padding: "10px 14px", color: "#10b981", fontWeight: 600 }}>{c.discount_percent}%</td>
-                                            <td style={{ padding: "10px 14px", color: "#94a3b8" }}>{c.uses_count ?? 0}{c.max_uses ? ` / ${c.max_uses}` : ""}</td>
-                                            <td style={{ padding: "10px 14px", color: "#475569", fontSize: 12 }} suppressHydrationWarning>
-                                                {c.expires_at ? new Date(c.expires_at).toLocaleDateString("pt-BR") : "—"}
-                                            </td>
-                                            <td style={{ padding: "10px 14px" }}>
-                                                <span style={{
-                                                    background: c.active ? "rgba(16,185,129,.12)" : "rgba(71,85,105,.15)",
-                                                    color: c.active ? "#10b981" : "#475569",
-                                                    borderRadius: 99, fontSize: 11, padding: "2px 10px", fontWeight: 600
-                                                }}>{c.active ? "Ativo" : "Inativo"}</span>
-                                            </td>
-                                            <td style={{ padding: "10px 14px" }}>
-                                                <div style={{ display: "flex", gap: 6 }}>
-                                                    <form action={async () => {
-                                                        "use server";
-                                                        const admin = createAdminClient();
-                                                        await admin.from("coupons").update({ active: !c.active }).eq("id", c.id);
-                                                        revalidatePath("/admin/plans");
-                                                    }}>
-                                                        <button type="submit" className="btn-ghost" style={{ padding: "4px 10px", fontSize: 11 }}>
-                                                            {c.active ? "Desativar" : "Ativar"}
-                                                        </button>
-                                                    </form>
-                                                    <form action={async () => {
-                                                        "use server";
-                                                        const admin = createAdminClient();
-                                                        await admin.from("coupons").delete().eq("id", c.id);
-                                                        revalidatePath("/admin/plans");
-                                                    }}>
-                                                        <button type="submit" className="btn-danger" style={{ padding: "4px 10px", fontSize: 11 }}>🗑</button>
-                                                    </form>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    ))}
+                                    {coupons.map((c: any) => {
+                                        const toggleAction = toggleCouponAction.bind(null, c.id);
+                                        const deleteAction = deleteCouponAction.bind(null, c.id);
+                                        return (
+                                            <tr key={c.id} style={{ borderBottom: "1px solid rgba(255,255,255,.03)" }}>
+                                                <td style={{ padding: "10px 14px" }}>
+                                                    <code style={{ color: "#f59e0b", background: "rgba(245,158,11,.08)", padding: "2px 8px", borderRadius: 4, fontSize: 12 }}>{c.code}</code>
+                                                </td>
+                                                <td style={{ padding: "10px 14px", color: "#10b981", fontWeight: 600 }}>{c.discount_percent}%</td>
+                                                <td style={{ padding: "10px 14px", color: "#94a3b8" }}>{c.uses_count ?? 0}{c.max_uses ? ` / ${c.max_uses}` : ""}</td>
+                                                <td style={{ padding: "10px 14px", color: "#475569", fontSize: 12 }} suppressHydrationWarning>
+                                                    {c.expires_at ? new Date(c.expires_at).toLocaleDateString("pt-BR") : "—"}
+                                                </td>
+                                                <td style={{ padding: "10px 14px" }}>
+                                                    <span style={{
+                                                        background: c.active ? "rgba(16,185,129,.12)" : "rgba(71,85,105,.15)",
+                                                        color: c.active ? "#10b981" : "#475569",
+                                                        borderRadius: 99, fontSize: 11, padding: "2px 10px", fontWeight: 600
+                                                    }}>{c.active ? "Ativo" : "Inativo"}</span>
+                                                </td>
+                                                <td style={{ padding: "10px 14px" }}>
+                                                    <div style={{ display: "flex", gap: 6 }}>
+                                                        <form action={toggleAction}>
+                                                            <button type="submit" className="btn-ghost" style={{ padding: "4px 10px", fontSize: 11 }}>
+                                                                {c.active ? "Desativar" : "Ativar"}
+                                                            </button>
+                                                        </form>
+                                                        <form action={deleteAction}>
+                                                            <button type="submit" className="btn-danger" style={{ padding: "4px 10px", fontSize: 11 }}>🗑</button>
+                                                        </form>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
                                 </tbody>
                             </table>
                         </div>

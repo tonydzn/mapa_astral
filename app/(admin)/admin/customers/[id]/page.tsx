@@ -1,7 +1,12 @@
 import { createAdminClient } from "@/lib/supabase/admin";
+import {
+    updateProfileAction,
+    togglePremiumAction,
+    deleteProfileAction,
+    deleteOrderAction,
+} from "@/actions/admin.actions";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { revalidatePath } from "next/cache";
 import type { Database } from "@/types/database.types";
 
 type ProfileRow = Database["public"]["Tables"]["profiles"]["Row"];
@@ -42,7 +47,7 @@ async function fetchProfileById(id: string) {
     const [profileRes, chartsRes, ordersRes] = await Promise.all([
         admin.from("profiles").select("*").eq("id", id).maybeSingle(),
         admin.from("birth_charts").select("id, name, birth_date, birth_place, created_at").eq("user_id", id).order("created_at", { ascending: false }),
-        admin.from("orders").select("*").eq("user_id", id).order("created_at", { ascending: false }),
+        admin.from("orders").select("id, plan, amount, status, created_at").eq("user_id", id).order("created_at", { ascending: false }),
     ]);
     return {
         profile: profileRes.data as ProfileRow | null,
@@ -56,6 +61,11 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
     const { profile, charts, orders } = await fetchProfileById(id);
 
     if (!profile) redirect("/admin/customers");
+
+    // Pre-bind server actions with the user ID
+    const updateAction = updateProfileAction.bind(null, id);
+    const toggleAction = togglePremiumAction.bind(null, id);
+    const deleteAction = deleteProfileAction.bind(null, id);
 
     const statusColor: Record<string, string> = {
         approved: "#10b981", pending: "#f59e0b", rejected: "#ef4444", cancelled: "#475569",
@@ -75,37 +85,13 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
                     </div>
                     <div style={{ marginLeft: "auto", display: "flex", gap: 8 }}>
                         {!profile.is_admin && (
-                            <form action={async () => {
-                                "use server";
-                                const admin = createAdminClient();
-                                const newVal = !profile.is_premium;
-                                await admin.from("profiles").update({
-                                    is_premium: newVal,
-                                    maps_limit: newVal ? 999 : 1,
-                                    updated_at: new Date().toISOString(),
-                                }).eq("id", id);
-                                revalidatePath(`/admin/customers/${id}`);
-                                revalidatePath("/admin/customers");
-                            }}>
+                            <form action={toggleAction}>
                                 <button type="submit" className="btn-gold" style={{ padding: "8px 18px", fontSize: 13 }}>
                                     {profile.is_premium ? "⬇ Rebaixar para Free" : "⬆ Fazer Premium"}
                                 </button>
                             </form>
                         )}
-                        <form action={async () => {
-                            "use server";
-                            const admin = createAdminClient();
-                            await Promise.all([
-                                admin.from("birth_charts").delete().eq("user_id", id),
-                                admin.from("mood_logs").delete().eq("user_id", id),
-                                admin.from("synastry_links").delete().eq("owner_id", id),
-                                admin.from("orders").delete().eq("user_id", id),
-                            ]);
-                            await admin.from("profiles").delete().eq("id", id);
-                            await admin.auth.admin.deleteUser(id);
-                            revalidatePath("/admin/customers");
-                            redirect("/admin/customers");
-                        }}>
+                        <form action={deleteAction}>
                             <button type="submit" className="btn-danger"
                                 onClick={(e) => { if (!confirm("Tem certeza? Esta ação é irreversível.")) e.preventDefault(); }}>
                                 🗑 Deletar conta
@@ -118,19 +104,7 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
                     {/* Edit form */}
                     <div className="card" style={{ padding: 24 }}>
                         <h2 style={{ color: "#f1f5f9", fontWeight: 700, fontSize: 16, marginBottom: 20 }}>✏️ Editar Dados</h2>
-                        <form action={async (formData: FormData) => {
-                            "use server";
-                            const admin = createAdminClient();
-                            await admin.from("profiles").update({
-                                full_name: formData.get("full_name") as string,
-                                maps_limit: parseInt(formData.get("maps_limit") as string ?? "1"),
-                                maps_count: parseInt(formData.get("maps_count") as string ?? "0"),
-                                is_premium: formData.get("plan") === "premium",
-                                updated_at: new Date().toISOString(),
-                            }).eq("id", id);
-                            revalidatePath(`/admin/customers/${id}`);
-                            revalidatePath("/admin/customers");
-                        }} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                        <form action={updateAction} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
                             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                                 <div>
                                     <label style={{ display: "block", color: "#64748b", fontSize: 12, marginBottom: 6 }}>Nome completo</label>
@@ -163,7 +137,7 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
                         <h2 style={{ color: "#f1f5f9", fontWeight: 700, fontSize: 16, marginBottom: 20 }}>ℹ️ Informações</h2>
                         {[
                             { label: "Plano", value: profile.is_premium ? "✨ Premium" : "🆓 Free" },
-                            { label: "Mapas", value: `${profile.maps_count} / ${profile.maps_limit}` },
+                            { label: "Mapas", value: `${profile.maps_count ?? 0} / ${profile.maps_limit ?? 1}` },
                             { label: "Cadastrado em", value: profile.created_at ? new Date(profile.created_at).toLocaleDateString("pt-BR") : "—" },
                             { label: "Última atualização", value: profile.updated_at ? new Date(profile.updated_at).toLocaleDateString("pt-BR") : "—" },
                             { label: "ID", value: id.slice(0, 12) + "..." },
@@ -199,31 +173,29 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
                     <div className="card" style={{ padding: 24, marginTop: 20 }}>
                         <h2 style={{ color: "#f1f5f9", fontWeight: 700, fontSize: 16, marginBottom: 16 }}>🧾 Pedidos ({orders.length})</h2>
                         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                            {orders.map((o: any) => (
-                                <div key={o.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 14px", background: "rgba(255,255,255,.03)", borderRadius: 8 }}>
-                                    <div>
-                                        <div style={{ color: "#f1f5f9", fontSize: 13, fontWeight: 500 }}>{o.plan}</div>
-                                        <div style={{ color: "#475569", fontSize: 11, marginTop: 2 }} suppressHydrationWarning>{o.created_at ? new Date(o.created_at).toLocaleDateString("pt-BR") : "—"}</div>
-                                    </div>
-                                    <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-                                        <div style={{ textAlign: "right" }}>
-                                            <div style={{ color: "#10b981", fontWeight: 600, fontSize: 13 }}>R$ {(Number(o.amount) || 0).toFixed(2)}</div>
-                                            <div style={{ color: statusColor[o.status] ?? "#475569", fontSize: 11 }}>{o.status}</div>
+                            {orders.map((o) => {
+                                const deleteOrderBound = deleteOrderAction.bind(null, o.id, id);
+                                return (
+                                    <div key={o.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 14px", background: "rgba(255,255,255,.03)", borderRadius: 8 }}>
+                                        <div>
+                                            <div style={{ color: "#f1f5f9", fontSize: 13, fontWeight: 500 }}>{(o as any).plan ?? "—"}</div>
+                                            <div style={{ color: "#475569", fontSize: 11, marginTop: 2 }} suppressHydrationWarning>{o.created_at ? new Date(o.created_at).toLocaleDateString("pt-BR") : "—"}</div>
                                         </div>
-                                        <form action={async () => {
-                                            "use server";
-                                            const admin = createAdminClient();
-                                            await admin.from("orders").delete().eq("id", o.id);
-                                            revalidatePath(`/admin/customers/${id}`);
-                                        }}>
-                                            <button type="submit" className="btn-ghost" style={{ padding: "4px 8px", fontSize: 13, color: "#ef4444" }}
-                                                onClick={(e) => { if (!confirm("Apagar pedido permanentemente?")) e.preventDefault(); }}>
-                                                🗑
-                                            </button>
-                                        </form>
+                                        <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+                                            <div style={{ textAlign: "right" }}>
+                                                <div style={{ color: "#10b981", fontWeight: 600, fontSize: 13 }}>R$ {(Number(o.amount) || 0).toFixed(2)}</div>
+                                                <div style={{ color: statusColor[o.status ?? ""] ?? "#475569", fontSize: 11 }}>{o.status}</div>
+                                            </div>
+                                            <form action={deleteOrderBound}>
+                                                <button type="submit" className="btn-ghost" style={{ padding: "4px 8px", fontSize: 13, color: "#ef4444" }}
+                                                    onClick={(e) => { if (!confirm("Apagar pedido permanentemente?")) e.preventDefault(); }}>
+                                                    🗑
+                                                </button>
+                                            </form>
+                                        </div>
                                     </div>
-                                </div>
-                            ))}
+                                );
+                            })}
                         </div>
                     </div>
                 )}

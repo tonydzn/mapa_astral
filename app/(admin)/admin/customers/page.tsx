@@ -1,6 +1,6 @@
 import { createAdminClient } from "@/lib/supabase/admin";
+import { togglePremiumAction } from "@/actions/admin.actions";
 import Link from "next/link";
-import { revalidatePath } from "next/cache";
 
 function AdminSidebar() {
     return (
@@ -109,49 +109,42 @@ export default async function CustomersPage({
                                 {profiles.length === 0 && (
                                     <tr><td colSpan={5} style={{ padding: "24px 16px", color: "#334155", textAlign: "center" }}>Nenhum cliente encontrado.</td></tr>
                                 )}
-                                {profiles.map((p) => (
-                                    <tr key={p.id} style={{ borderBottom: "1px solid rgba(255,255,255,.03)" }}>
-                                        <td style={{ padding: "12px 16px" }}>
-                                            <div style={{ color: "#f1f5f9", fontWeight: 500 }}>{p.full_name ?? "—"}</div>
-                                            <div style={{ color: "#475569", fontSize: 11, marginTop: 2 }}>{p.email}</div>
-                                        </td>
-                                        <td style={{ padding: "12px 16px" }}>
-                                            {p.is_premium
-                                                ? <span className="badge-gold">✨ Premium</span>
-                                                : <span style={{ background: "rgba(71,85,105,.15)", color: "#475569", borderRadius: 99, fontSize: 11, padding: "2px 10px", fontWeight: 600, display: "inline-block" }}>Free</span>
-                                            }
-                                            {p.is_admin && <span style={{ marginLeft: 6, background: "rgba(139,92,246,.15)", color: "#c4b5fd", borderRadius: 99, fontSize: 10, padding: "1px 8px", fontWeight: 600, display: "inline-block" }}>Admin</span>}
-                                        </td>
-                                        <td style={{ padding: "12px 16px", color: "#94a3b8" }}>{p.maps_count} / {p.maps_limit}</td>
-                                        <td style={{ padding: "12px 16px", color: "#475569", fontSize: 12 }} suppressHydrationWarning>
-                                            {p.created_at ? new Date(p.created_at).toLocaleDateString("pt-BR") : "—"}
-                                        </td>
-                                        <td style={{ padding: "12px 16px" }}>
-                                            <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                                                <Link href={`/admin/customers/${p.id}`} className="btn-ghost" style={{ padding: "5px 12px", fontSize: 12 }}>
-                                                    ✏️ Editar
-                                                </Link>
-                                                {!p.is_admin && (
-                                                    <form action={async () => {
-                                                        "use server";
-                                                        const admin = createAdminClient();
-                                                        const newVal = !p.is_premium;
-                                                        await admin.from("profiles").update({
-                                                            is_premium: newVal,
-                                                            maps_limit: newVal ? 999 : 1,
-                                                            updated_at: new Date().toISOString(),
-                                                        }).eq("id", p.id);
-                                                        revalidatePath("/admin/customers");
-                                                    }}>
-                                                        <button type="submit" className="btn-ghost" style={{ padding: "5px 12px", fontSize: 12, color: p.is_premium ? "#f87171" : "#10b981" }}>
-                                                            {p.is_premium ? "⬇ Rebaixar" : "⬆ Upgrade"}
-                                                        </button>
-                                                    </form>
-                                                )}
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))}
+                                {profiles.map((p) => {
+                                    const toggleAction = togglePremiumAction.bind(null, p.id);
+                                    return (
+                                        <tr key={p.id} style={{ borderBottom: "1px solid rgba(255,255,255,.03)" }}>
+                                            <td style={{ padding: "12px 16px" }}>
+                                                <div style={{ color: "#f1f5f9", fontWeight: 500 }}>{p.full_name ?? "—"}</div>
+                                                <div style={{ color: "#475569", fontSize: 11, marginTop: 2 }}>{p.email}</div>
+                                            </td>
+                                            <td style={{ padding: "12px 16px" }}>
+                                                {p.is_premium
+                                                    ? <span className="badge-gold">✨ Premium</span>
+                                                    : <span style={{ background: "rgba(71,85,105,.15)", color: "#475569", borderRadius: 99, fontSize: 11, padding: "2px 10px", fontWeight: 600, display: "inline-block" }}>Free</span>
+                                                }
+                                                {p.is_admin && <span style={{ marginLeft: 6, background: "rgba(139,92,246,.15)", color: "#c4b5fd", borderRadius: 99, fontSize: 10, padding: "1px 8px", fontWeight: 600, display: "inline-block" }}>Admin</span>}
+                                            </td>
+                                            <td style={{ padding: "12px 16px", color: "#94a3b8" }}>{p.maps_count} / {p.maps_limit}</td>
+                                            <td style={{ padding: "12px 16px", color: "#475569", fontSize: 12 }} suppressHydrationWarning>
+                                                {p.created_at ? new Date(p.created_at).toLocaleDateString("pt-BR") : "—"}
+                                            </td>
+                                            <td style={{ padding: "12px 16px" }}>
+                                                <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                                                    <Link href={`/admin/customers/${p.id}`} className="btn-ghost" style={{ padding: "5px 12px", fontSize: 12 }}>
+                                                        ✏️ Editar
+                                                    </Link>
+                                                    {!p.is_admin && (
+                                                        <form action={toggleAction}>
+                                                            <button type="submit" className="btn-ghost" style={{ padding: "5px 12px", fontSize: 12, color: p.is_premium ? "#f87171" : "#10b981" }}>
+                                                                {p.is_premium ? "⬇ Rebaixar" : "⬆ Upgrade"}
+                                                            </button>
+                                                        </form>
+                                                    )}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
                             </tbody>
                         </table>
                     </div>
