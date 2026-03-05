@@ -1,30 +1,12 @@
 "use server";
 
 import { createAdminClient } from "@/lib/supabase/admin";
-import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 
-import { redirect } from "next/navigation";
-
-// ─── Auth guard ────────────────────────────────────────────────────────────
-async function requireAdmin() {
-    const supabase = await createServerSupabaseClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) redirect("/admin/login");
-
-    const { data: profile } = await supabase
-        .from("profiles")
-        .select("is_admin")
-        .eq("id", user.id)
-        .maybeSingle();
-
-    if (!profile?.is_admin) redirect("/admin/login");
-    return user;
-}
+// Auth is enforced by app/(admin)/layout.tsx — no need to re-check here.
 
 // ─── Stats ─────────────────────────────────────────────────────────────────
 export async function getAdminStats() {
-    await requireAdmin();
     const admin = createAdminClient();
 
     const [profilesRes, premiumRes, ordersRes, monthOrdersRes] = await Promise.all([
@@ -64,7 +46,6 @@ export async function getAdminStats() {
 
 // ─── Profiles / Customers ──────────────────────────────────────────────────
 export async function getAllProfiles(search = "", filter: "all" | "free" | "premium" = "all") {
-    await requireAdmin();
     const admin = createAdminClient();
 
     let query = admin
@@ -82,7 +63,6 @@ export async function getAllProfiles(search = "", filter: "all" | "free" | "prem
 }
 
 export async function getProfileById(id: string) {
-    await requireAdmin();
     const admin = createAdminClient();
 
     const [profileRes, chartsRes, ordersRes] = await Promise.all([
@@ -104,7 +84,6 @@ export async function updateProfile(id: string, updates: {
     maps_limit?: number;
     maps_count?: number;
 }) {
-    await requireAdmin();
     const admin = createAdminClient();
     const { error } = await admin.from("profiles").update({ ...updates, updated_at: new Date().toISOString() }).eq("id", id);
     if (error) return { error: error.message };
@@ -122,7 +101,6 @@ export async function downgradePlan(id: string) {
 }
 
 export async function deleteProfile(id: string) {
-    await requireAdmin();
     const admin = createAdminClient();
 
     // Delete related records first
@@ -146,7 +124,6 @@ export async function deleteProfile(id: string) {
 
 // ─── Orders ────────────────────────────────────────────────────────────────
 export async function getOrders(limit = 50) {
-    await requireAdmin();
     const admin = createAdminClient();
 
     const { data, error } = await admin
@@ -160,7 +137,6 @@ export async function getOrders(limit = 50) {
 }
 
 export async function deleteOrder(id: string) {
-    await requireAdmin();
     const admin = createAdminClient();
     const { error } = await admin.from("orders").delete().eq("id", id);
     if (error) return { error: error.message };
@@ -172,7 +148,6 @@ export async function deleteOrder(id: string) {
 
 // ─── Coupons ───────────────────────────────────────────────────────────────
 export async function getCoupons() {
-    await requireAdmin();
     const admin = createAdminClient();
     const { data } = await admin.from("coupons").select("*").order("created_at", { ascending: false });
     return data ?? [];
@@ -184,7 +159,6 @@ export async function createCoupon(coupon: {
     max_uses?: number;
     expires_at?: string;
 }) {
-    await requireAdmin();
     const admin = createAdminClient();
     const { error } = await admin.from("coupons").insert({
         code: coupon.code.toUpperCase(),
@@ -199,14 +173,12 @@ export async function createCoupon(coupon: {
 }
 
 export async function toggleCoupon(id: string, active: boolean) {
-    await requireAdmin();
     const admin = createAdminClient();
     await admin.from("coupons").update({ active }).eq("id", id);
     revalidatePath("/admin/plans");
 }
 
 export async function deleteCoupon(id: string) {
-    await requireAdmin();
     const admin = createAdminClient();
     await admin.from("coupons").delete().eq("id", id);
     revalidatePath("/admin/plans");
