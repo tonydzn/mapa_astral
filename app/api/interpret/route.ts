@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 
+export const maxDuration = 60; // Allow up to 60 seconds on Vercel for OpenRouter generation
+
 const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
 
 const ASTRO_SYSTEM_PROMPT = `Você é uma astróloga especialista com 30 anos de experiência,
@@ -49,26 +51,29 @@ export async function POST(req: NextRequest) {
         .single();
 
     const model = profile?.is_premium
-        ? process.env.PREMIUM_MODEL
-        : process.env.FREE_MODEL;
+        ? (process.env.PREMIUM_MODEL || "google/gemini-2.0-flash-001")
+        : (process.env.FREE_MODEL || "meta-llama/llama-3.3-70b-instruct");
 
-    // Extrai dados do chart_data
+    // Extrai dados do chart_data com segurança
     const chartData = (chart as any).chart_data as {
-        planets: { planet: string; sign: string; degree: number; house: number; retrograde?: boolean }[];
-        ascendant: { sign: string; degree: number };
-        midheaven: { sign: string; degree: number };
-        aspects: { planet1: string; type: string; planet2: string; orb: number }[];
-        moonPhase: { name: string; emoji: string };
-    };
+        planets?: { planet: string; sign: string; degree: number; house: number; retrograde?: boolean }[];
+        ascendant?: { sign: string; degree: number };
+        midheaven?: { sign: string; degree: number };
+        aspects?: { planet1: string; type: string; planet2: string; orb: number }[];
+        moonPhase?: { name: string; emoji: string };
+    } | null;
 
-    const planetSummary = chartData.planets
+    const planetSummary = (chartData?.planets || [])
         .map(p => `${p.planet} em ${p.sign} ${p.degree.toFixed(1)}° (casa ${p.house})${p.retrograde ? " ℞" : ""}`)
         .join("\n");
 
-    const aspectSummary = chartData.aspects
+    const aspectSummary = (chartData?.aspects || [])
         .slice(0, 12)
         .map(a => `${a.planet1} ${a.type} ${a.planet2} (orbe ${a.orb}°)`)
         .join("\n");
+
+    const ascendantStr = chartData?.ascendant ? `${chartData.ascendant.sign} ${chartData.ascendant.degree.toFixed(1)}°` : "Desconhecido";
+    const midheavenStr = chartData?.midheaven ? `${chartData.midheaven.sign} ${chartData.midheaven.degree.toFixed(1)}°` : "Desconhecido";
 
     const userPrompt = `
 Gere uma interpretação astrológica profunda e personalizada para:
@@ -77,13 +82,13 @@ Gere uma interpretação astrológica profunda e personalizada para:
 **Data:** ${(chart as any).birth_date}
 **Local:** ${(chart as any).birth_place || "Brasil"}
 **Hora:** ${(chart as any).birth_time || "Não informada"}
-**Fase Lunar no nascimento:** ${chartData.moonPhase?.name || ""}
+**Fase Lunar no nascimento:** ${chartData?.moonPhase?.name || ""}
 
 ## Posições Planetárias
 ${planetSummary}
 
-## Ascendente: ${chartData.ascendant.sign} ${chartData.ascendant.degree.toFixed(1)}°
-## Meio do Céu: ${chartData.midheaven.sign} ${chartData.midheaven.degree.toFixed(1)}°
+## Ascendente: ${ascendantStr}
+## Meio do Céu: ${midheavenStr}
 
 ## Aspectos Principais
 ${aspectSummary}
@@ -92,6 +97,11 @@ Gere a interpretação completa seguindo o sistema do prompt.
 `.trim();
 
     try {
+        if (!process.env.OPENROUTER_API_KEY) {
+            console.error("Missing OPENROUTER_API_KEY environment variable");
+            return NextResponse.json({ error: "Configuração do servidor incompleta (OpenRouter API Key ausente)." }, { status: 500 });
+        }
+
         const response = await fetch(OPENROUTER_URL, {
             method: "POST",
             headers: {
@@ -114,7 +124,7 @@ Gere a interpretação completa seguindo o sistema do prompt.
         if (!response.ok) {
             const errText = await response.text();
             console.error("OpenRouter error:", errText);
-            return NextResponse.json({ error: `Erro do sistema: ${response.status}` }, { status: 500 });
+            return NextResponse.json({ error: `Erro do sistema OpenRouter: ${response.status}` }, { status: 500 });
         }
 
         const json = await response.json();
@@ -131,8 +141,8 @@ Gere a interpretação completa seguindo o sistema do prompt.
             .eq("id", chartId);
 
         return NextResponse.json({ interpretation });
-    } catch (err) {
+    } catch (err: any) {
         console.error("Interpret API error:", err);
-        return NextResponse.json({ error: "Erro interno. Tente novamente." }, { status: 500 });
+        return NextResponse.json({ error: `Erro interno (${err.message}). Tente novamente.` }, { status: 500 });
     }
 }
