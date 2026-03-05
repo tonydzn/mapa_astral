@@ -83,7 +83,7 @@ export async function POST(req: NextRequest) {
           <p>Seu acesso Premium foi ativado com sucesso. Agora você tem:</p>
           <ul>
             <li>Mapas Natais ilimitados</li>
-            <li>Interpretação Estelar Avançada</li>
+            <li>Interpretação de Mapa Astral Avançada</li>
             <li>Download em PDF</li>
             <li>Sinastria Amorosa</li>
             <li>Previsões mensais personalizadas</li>

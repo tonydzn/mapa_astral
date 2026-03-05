@@ -210,7 +210,7 @@ export default async function ChartPrintPage({ params }: { params: Promise<{ id:
                     {/* ── INTERPRETAÇÃO ── */}
                     {interpretation && (
                         <div className="section">
-                            <h2 className="section-title">Interpretação Estelar</h2>
+                            <h2 className="section-title">Interpretação de Mapa Astral</h2>
                             <div className="interpretation" dangerouslySetInnerHTML={{
                                 __html: interpretation
                                     .replace(/^### (.+)$/gm, '<h3>$1</h3>')

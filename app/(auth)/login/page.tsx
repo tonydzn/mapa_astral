@@ -44,7 +44,7 @@ export default function LoginPage() {
                         Mapas natais completos, sinastria amorosa e previsões personalizadas para seu autoconhecimento.
                     </p>
                     <div style={{ marginTop: 48, display: "flex", flexDirection: "column", gap: 14 }}>
-                        {["🌌 Mapa natal com posições planetárias precisas", "✨ Interpretação Estelar Profunda", "💑 Sinastria amorosa viral", "🌕 Mood tracker com fases lunares"].map(t => (
+                        {["🌌 Mapa natal com posições planetárias precisas", "✨ Interpretação de Mapa Astral Profunda", "💑 Sinastria amorosa viral", "🌕 Mood tracker com fases lunares"].map(t => (
                             <div key={t} style={{ display: "flex", alignItems: "center", gap: 12, color: "#64748b", fontSize: 14 }}>
                                 <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#f59e0b", flexShrink: 0 }} />
                                 {t}

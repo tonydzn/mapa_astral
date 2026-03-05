@@ -73,7 +73,7 @@ export default function ChartView({ chart, profile }: Props) {
     const tabs = [
         { key: "planets", label: "🪐 Planetas" },
         { key: "aspects", label: "⚡ Aspectos" },
-        { key: "ai", label: "✨ Interpretação Estelar" },
+        { key: "ai", label: "✨ Interpretação de Mapa Astral" },
     ];
 
     return (
@@ -181,7 +181,7 @@ export default function ChartView({ chart, profile }: Props) {
                         <div className="animate-fade-in">
                             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
                                 <div>
-                                    <h2 style={{ fontSize: 16, fontWeight: 700, color: "#fff", margin: 0 }}>Interpretação Estelar</h2>
+                                    <h2 style={{ fontSize: 16, fontWeight: 700, color: "#fff", margin: 0 }}>Interpretação de Mapa Astral</h2>
                                     <p style={{ fontSize: 12, color: "#334155", marginTop: 4 }}>
                                         {profile?.is_premium ? "✦ Interpretação Completa (Premium)" : "Análise Essencial (gratuito)"}
                                     </p>
