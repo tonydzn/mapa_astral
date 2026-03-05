@@ -1,37 +1,87 @@
-import { getAdminStats, getOrders, deleteOrder } from "@/actions/admin.actions";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { revalidatePath } from "next/cache";
 import Link from "next/link";
-import { createServerSupabaseClient } from "@/lib/supabase/server";
-import { redirect } from "next/navigation";
 
-async function AdminSidebarItem({ href, label, emoji }: { href: string; label: string; emoji: string }) {
-    return null; // handled inline
-}
+// ─── Data fetching directly in the page (no server action layer) ────────────
 
-export default async function AdminDashboardPage() {
-    const supabase = await createServerSupabaseClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) redirect("/admin/login");
+async function fetchStats() {
+    const admin = createAdminClient();
 
-    const [stats, orders] = await Promise.all([
-        getAdminStats(),
-        getOrders(20),
+    const [profilesRes, premiumRes, ordersRes, monthOrdersRes] = await Promise.all([
+        admin.from("profiles").select("*", { count: "exact", head: true }),
+        admin.from("profiles").select("*", { count: "exact", head: true }).eq("is_premium", true),
+        admin.from("orders").select("amount, status, created_at").eq("status", "approved"),
+        admin.from("orders")
+            .select("amount, created_at")
+            .eq("status", "approved")
+            .gte("created_at", new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString()),
     ]);
 
+    const toNum = (v: unknown) => Number(v) || 0;
+    const totalRevenue = (ordersRes.data || []).reduce((s, o) => s + toNum(o.amount), 0);
+    const monthRevenue = (monthOrdersRes.data || []).reduce((s, o) => s + toNum(o.amount), 0);
+
+    const now = new Date();
+    const days: { date: string; revenue: number }[] = [];
+    for (let i = 29; i >= 0; i--) {
+        const d = new Date(now);
+        d.setDate(d.getDate() - i);
+        const dateStr = d.toISOString().slice(0, 10);
+        const revenue = (ordersRes.data || [])
+            .filter(o => o?.created_at && o.created_at.slice(0, 10) === dateStr)
+            .reduce((s, o) => s + toNum(o.amount), 0);
+        days.push({ date: dateStr, revenue });
+    }
+
+    return {
+        totalUsers: profilesRes.count ?? 0,
+        premiumUsers: premiumRes.count ?? 0,
+        totalRevenue,
+        monthRevenue,
+        salesChart: days,
+    };
+}
+
+async function fetchOrders(limit = 20) {
+    const admin = createAdminClient();
+    const { data, error } = await admin
+        .from("orders")
+        .select("id, user_id, status, amount, plan, created_at")
+        .order("created_at", { ascending: false })
+        .limit(limit);
+    if (error) throw new Error(error.message);
+    return data ?? [];
+}
+
+async function fetchOrderProfiles(orders: { user_id: string }[]) {
+    if (orders.length === 0) return {};
+    const admin = createAdminClient();
+    const ids = [...new Set(orders.map(o => o.user_id))];
+    const { data } = await admin
+        .from("profiles")
+        .select("id, full_name, email")
+        .in("id", ids);
+    const map: Record<string, { full_name: string | null; email: string | null }> = {};
+    (data || []).forEach(p => { map[p.id] = { full_name: p.full_name, email: p.email }; });
+    return map;
+}
+
+// ─── Page ───────────────────────────────────────────────────────────────────
+
+export default async function AdminDashboardPage() {
+    const [stats, orders] = await Promise.all([fetchStats(), fetchOrders(20)]);
+    const profileMap = await fetchOrderProfiles(orders);
+
     const freeUsers = stats.totalUsers - stats.premiumUsers;
-    const conversionRate = stats.totalUsers > 0 ? ((stats.premiumUsers / stats.totalUsers) * 100).toFixed(1) : "0";
+    const conversionRate = stats.totalUsers > 0
+        ? ((stats.premiumUsers / stats.totalUsers) * 100).toFixed(1)
+        : "0";
 
     const statusColor: Record<string, string> = {
-        approved: "#10b981",
-        pending: "#f59e0b",
-        rejected: "#ef4444",
-        cancelled: "#475569",
+        approved: "#10b981", pending: "#f59e0b", rejected: "#ef4444", cancelled: "#475569",
     };
-
     const statusLabel: Record<string, string> = {
-        approved: "Aprovado",
-        pending: "Pendente",
-        rejected: "Rejeitado",
-        cancelled: "Cancelado",
+        approved: "Aprovado", pending: "Pendente", rejected: "Rejeitado", cancelled: "Cancelado",
     };
 
     const maxRevenue = Math.max(...stats.salesChart.map(d => d.revenue), 1);
@@ -41,7 +91,8 @@ export default async function AdminDashboardPage() {
             {/* Sidebar */}
             <aside style={{
                 width: 220, background: "rgba(10,16,31,0.95)", borderRight: "1px solid #1a2540",
-                display: "flex", flexDirection: "column", padding: "24px 0", flexShrink: 0, position: "sticky", top: 0, height: "100dvh"
+                display: "flex", flexDirection: "column", padding: "24px 0", flexShrink: 0,
+                position: "sticky", top: 0, height: "100dvh"
             }}>
                 <div style={{ padding: "0 20px 24px", borderBottom: "1px solid #1a2540" }}>
                     <span style={{ color: "#f59e0b", fontWeight: 800, fontSize: 15, letterSpacing: 1 }}>⚙️ Admin Panel</span>
@@ -56,7 +107,7 @@ export default async function AdminDashboardPage() {
                     ].map(item => (
                         <Link key={item.href} href={item.href} style={{
                             display: "flex", alignItems: "center", gap: 10, padding: "10px 12px",
-                            borderRadius: 8, textDecoration: "none", color: "#94a3b8", fontSize: 14, transition: "all .2s"
+                            borderRadius: 8, textDecoration: "none", color: "#94a3b8", fontSize: 14,
                         }}>
                             <span>{item.emoji}</span>
                             <span>{item.label}</span>
@@ -112,7 +163,6 @@ export default async function AdminDashboardPage() {
                                     : "rgba(255,255,255,.05)",
                                 borderRadius: "3px 3px 0 0",
                                 cursor: "help",
-                                transition: "filter .2s",
                             }} />
                         ))}
                     </div>
@@ -132,7 +182,7 @@ export default async function AdminDashboardPage() {
                         <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
                             <thead>
                                 <tr>
-                                    {["Cliente", "Plano", "Valor", "Status", "Data", ""].map(h => (
+                                    {["Cliente", "Plano", "Valor", "Status", "Data"].map(h => (
                                         <th key={h} style={{ color: "#475569", fontWeight: 500, textAlign: "left", padding: "6px 12px", borderBottom: "1px solid #1a2540" }}>{h}</th>
                                     ))}
                                 </tr>
@@ -141,37 +191,31 @@ export default async function AdminDashboardPage() {
                                 {orders.length === 0 && (
                                     <tr><td colSpan={5} style={{ padding: "20px 12px", color: "#334155", textAlign: "center" }}>Nenhum pedido encontrado.</td></tr>
                                 )}
-                                {orders.map((order: any) => (
-                                    <tr key={order.id} style={{ borderBottom: "1px solid rgba(255,255,255,.03)" }}>
-                                        <td style={{ padding: "10px 12px" }}>
-                                            <div style={{ color: "#f1f5f9" }}>{order.profiles?.full_name ?? "—"}</div>
-                                            <div style={{ color: "#475569", fontSize: 11 }}>{order.profiles?.email ?? "—"}</div>
-                                        </td>
-                                        <td style={{ padding: "10px 12px", color: "#94a3b8" }}>{order.plan}</td>
-                                        <td style={{ padding: "10px 12px", color: "#10b981", fontWeight: 600 }}>R$ {(order.amount ?? 0).toFixed(2)}</td>
-                                        <td style={{ padding: "10px 12px" }}>
-                                            <span style={{
-                                                background: `${statusColor[order.status] ?? "#475569"}20`,
-                                                color: statusColor[order.status] ?? "#475569",
-                                                borderRadius: 99, fontSize: 11, padding: "2px 10px", fontWeight: 600
-                                            }}>{statusLabel[order.status] ?? order.status}</span>
-                                        </td>
-                                        <td style={{ padding: "10px 12px", color: "#475569", fontSize: 12 }} suppressHydrationWarning>
-                                            {order.created_at ? new Date(order.created_at).toLocaleDateString("pt-BR") : "—"}
-                                        </td>
-                                        <td style={{ padding: "10px 12px", textAlign: "right" }}>
-                                            <form action={async () => {
-                                                "use server";
-                                                await deleteOrder(order.id);
-                                            }}>
-                                                <button type="submit" className="btn-ghost" style={{ padding: "4px 8px", fontSize: 12, color: "#ef4444" }}
-                                                    onClick={(e) => { if (!confirm("Tem certeza que deseja apagar este pedido?")) e.preventDefault(); }}>
-                                                    🗑
-                                                </button>
-                                            </form>
-                                        </td>
-                                    </tr>
-                                ))}
+                                {orders.map((order) => {
+                                    const profile = profileMap[order.user_id] ?? { full_name: null, email: null };
+                                    return (
+                                        <tr key={order.id} style={{ borderBottom: "1px solid rgba(255,255,255,.03)" }}>
+                                            <td style={{ padding: "10px 12px" }}>
+                                                <div style={{ color: "#f1f5f9" }}>{profile.full_name ?? "—"}</div>
+                                                <div style={{ color: "#475569", fontSize: 11 }}>{profile.email ?? "—"}</div>
+                                            </td>
+                                            <td style={{ padding: "10px 12px", color: "#94a3b8" }}>{(order as any).plan ?? "—"}</td>
+                                            <td style={{ padding: "10px 12px", color: "#10b981", fontWeight: 600 }}>
+                                                R$ {(Number(order.amount) || 0).toFixed(2)}
+                                            </td>
+                                            <td style={{ padding: "10px 12px" }}>
+                                                <span style={{
+                                                    background: `${statusColor[order.status ?? ""] ?? "#475569"}20`,
+                                                    color: statusColor[order.status ?? ""] ?? "#475569",
+                                                    borderRadius: 99, fontSize: 11, padding: "2px 10px", fontWeight: 600
+                                                }}>{statusLabel[order.status ?? ""] ?? order.status}</span>
+                                            </td>
+                                            <td style={{ padding: "10px 12px", color: "#475569", fontSize: 12 }} suppressHydrationWarning>
+                                                {order.created_at ? new Date(order.created_at).toLocaleDateString("pt-BR") : "—"}
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
                             </tbody>
                         </table>
                     </div>
