@@ -50,9 +50,10 @@ export async function POST(req: NextRequest) {
         .eq("id", user.id)
         .single();
 
-    const model = profile?.is_premium
+    const rawModel = profile?.is_premium
         ? (process.env.PREMIUM_MODEL || "google/gemini-2.0-flash-001")
         : (process.env.FREE_MODEL || "meta-llama/llama-3.3-70b-instruct");
+    const model = rawModel.trim();
 
     // Extrai dados do chart_data com segurança
     const chartData = (chart as any).chart_data as {
@@ -124,7 +125,15 @@ Gere a interpretação completa seguindo o sistema do prompt.
         if (!response.ok) {
             const errText = await response.text();
             console.error("OpenRouter error:", errText);
-            return NextResponse.json({ error: `Erro do sistema OpenRouter: ${response.status}` }, { status: 500 });
+            // Try to extract the exact error message from OpenRouter JSON
+            let apiErrorMsg = "";
+            try {
+                const parsedErr = JSON.parse(errText);
+                apiErrorMsg = parsedErr?.error?.message || errText;
+            } catch {
+                apiErrorMsg = errText;
+            }
+            return NextResponse.json({ error: `Erro OpenRouter (${response.status}): ${apiErrorMsg}` }, { status: 500 });
         }
 
         const json = await response.json();
