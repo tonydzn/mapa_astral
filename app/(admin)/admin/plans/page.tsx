@@ -1,4 +1,5 @@
-import { getCoupons, createCoupon, toggleCoupon, deleteCoupon } from "@/actions/admin.actions";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { revalidatePath } from "next/cache";
 import Link from "next/link";
 
 function AdminSidebar() {
@@ -33,7 +34,8 @@ function AdminSidebar() {
 }
 
 export default async function PlansPage() {
-    const coupons = await getCoupons();
+    const admin = createAdminClient();
+    const { data: coupons } = await admin.from("coupons").select("*").order("created_at", { ascending: false });
 
     const plans = [
         { id: "premium_monthly", label: "Premium Mensal", priceEnvKey: "NEXT_PUBLIC_PREMIUM_PRICE_MONTHLY", defaultPrice: "29.90", period: "mês" },
@@ -76,11 +78,19 @@ export default async function PlansPage() {
                     <h2 style={{ color: "#f1f5f9", fontWeight: 700, fontSize: 16, marginBottom: 20 }}>🎟️ Criar Cupom de Desconto</h2>
                     <form action={async (formData: FormData) => {
                         "use server";
-                        const code = formData.get("code") as string;
+                        const admin = createAdminClient();
+                        const code = (formData.get("code") as string).toUpperCase();
                         const discount = parseFloat(formData.get("discount") as string);
-                        const maxUses = formData.get("max_uses") ? parseInt(formData.get("max_uses") as string) : undefined;
-                        const expiresAt = formData.get("expires_at") as string || undefined;
-                        await createCoupon({ code, discount_percent: discount, max_uses: maxUses, expires_at: expiresAt });
+                        const maxUsesRaw = formData.get("max_uses") as string;
+                        const expiresAtRaw = formData.get("expires_at") as string;
+                        await admin.from("coupons").insert({
+                            code,
+                            discount_percent: discount,
+                            max_uses: maxUsesRaw ? parseInt(maxUsesRaw) : null,
+                            expires_at: expiresAtRaw || null,
+                            active: true,
+                        });
+                        revalidatePath("/admin/plans");
                     }} style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 16, alignItems: "end" }}>
                         <div>
                             <label style={{ display: "block", color: "#64748b", fontSize: 12, marginBottom: 6 }}>Código do cupom*</label>
@@ -99,9 +109,7 @@ export default async function PlansPage() {
                             <input name="expires_at" type="date" className="input-dark" style={{ fontSize: 13 }} />
                         </div>
                         <div>
-                            <button type="submit" className="btn-gold" style={{ width: "100%", padding: "11px" }}>
-                                + Criar Cupom
-                            </button>
+                            <button type="submit" className="btn-gold" style={{ width: "100%", padding: "11px" }}>+ Criar Cupom</button>
                         </div>
                     </form>
                 </div>
@@ -110,10 +118,10 @@ export default async function PlansPage() {
                 <div className="card" style={{ padding: 24 }}>
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
                         <h2 style={{ color: "#f1f5f9", fontWeight: 700, fontSize: 16 }}>🗓️ Cupons Cadastrados</h2>
-                        <span style={{ color: "#475569", fontSize: 12 }}>{coupons.length} cupons</span>
+                        <span style={{ color: "#475569", fontSize: 12 }}>{coupons?.length ?? 0} cupons</span>
                     </div>
 
-                    {coupons.length === 0 ? (
+                    {(!coupons || coupons.length === 0) ? (
                         <p style={{ color: "#334155", fontSize: 13, textAlign: "center", padding: "20px 0" }}>Nenhum cupom cadastrado.</p>
                     ) : (
                         <div style={{ overflowX: "auto" }}>
@@ -132,7 +140,7 @@ export default async function PlansPage() {
                                                 <code style={{ color: "#f59e0b", background: "rgba(245,158,11,.08)", padding: "2px 8px", borderRadius: 4, fontSize: 12 }}>{c.code}</code>
                                             </td>
                                             <td style={{ padding: "10px 14px", color: "#10b981", fontWeight: 600 }}>{c.discount_percent}%</td>
-                                            <td style={{ padding: "10px 14px", color: "#94a3b8" }}>{c.uses_count}{c.max_uses ? ` / ${c.max_uses}` : ""}</td>
+                                            <td style={{ padding: "10px 14px", color: "#94a3b8" }}>{c.uses_count ?? 0}{c.max_uses ? ` / ${c.max_uses}` : ""}</td>
                                             <td style={{ padding: "10px 14px", color: "#475569", fontSize: 12 }} suppressHydrationWarning>
                                                 {c.expires_at ? new Date(c.expires_at).toLocaleDateString("pt-BR") : "—"}
                                             </td>
@@ -145,15 +153,23 @@ export default async function PlansPage() {
                                             </td>
                                             <td style={{ padding: "10px 14px" }}>
                                                 <div style={{ display: "flex", gap: 6 }}>
-                                                    <form action={async () => { "use server"; await toggleCoupon(c.id, !c.active); }}>
+                                                    <form action={async () => {
+                                                        "use server";
+                                                        const admin = createAdminClient();
+                                                        await admin.from("coupons").update({ active: !c.active }).eq("id", c.id);
+                                                        revalidatePath("/admin/plans");
+                                                    }}>
                                                         <button type="submit" className="btn-ghost" style={{ padding: "4px 10px", fontSize: 11 }}>
                                                             {c.active ? "Desativar" : "Ativar"}
                                                         </button>
                                                     </form>
-                                                    <form action={async () => { "use server"; await deleteCoupon(c.id); }}>
-                                                        <button type="submit" className="btn-danger" style={{ padding: "4px 10px", fontSize: 11 }}>
-                                                            🗑
-                                                        </button>
+                                                    <form action={async () => {
+                                                        "use server";
+                                                        const admin = createAdminClient();
+                                                        await admin.from("coupons").delete().eq("id", c.id);
+                                                        revalidatePath("/admin/plans");
+                                                    }}>
+                                                        <button type="submit" className="btn-danger" style={{ padding: "4px 10px", fontSize: 11 }}>🗑</button>
                                                     </form>
                                                 </div>
                                             </td>

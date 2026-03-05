@@ -1,7 +1,7 @@
-import { getAllProfiles, upgradeToPremium, downgradePlan, deleteProfile } from "@/actions/admin.actions";
+import { createAdminClient } from "@/lib/supabase/admin";
 import Link from "next/link";
+import { revalidatePath } from "next/cache";
 
-// Inline Sidebar for reuse
 function AdminSidebar() {
     return (
         <aside style={{
@@ -35,13 +35,29 @@ function AdminSidebar() {
     );
 }
 
+async function fetchProfiles(search: string, filter: string) {
+    const admin = createAdminClient();
+    let query = admin
+        .from("profiles")
+        .select("id, email, full_name, is_premium, is_admin, maps_count, maps_limit, created_at")
+        .order("created_at", { ascending: false });
+
+    if (filter === "premium") query = query.eq("is_premium", true);
+    if (filter === "free") query = query.eq("is_premium", false);
+    if (search) query = query.or(`email.ilike.%${search}%,full_name.ilike.%${search}%`);
+
+    const { data, error } = await query;
+    if (error) throw new Error(error.message);
+    return data ?? [];
+}
+
 export default async function CustomersPage({
     searchParams,
 }: {
     searchParams: Promise<{ search?: string; filter?: string }>;
 }) {
     const { search = "", filter = "all" } = await searchParams;
-    const profiles = await getAllProfiles(search, filter as "all" | "free" | "premium");
+    const profiles = await fetchProfiles(search, filter);
 
     return (
         <div style={{ display: "flex", minHeight: "100dvh" }}>
@@ -93,7 +109,7 @@ export default async function CustomersPage({
                                 {profiles.length === 0 && (
                                     <tr><td colSpan={5} style={{ padding: "24px 16px", color: "#334155", textAlign: "center" }}>Nenhum cliente encontrado.</td></tr>
                                 )}
-                                {profiles.map((p: any) => (
+                                {profiles.map((p) => (
                                     <tr key={p.id} style={{ borderBottom: "1px solid rgba(255,255,255,.03)" }}>
                                         <td style={{ padding: "12px 16px" }}>
                                             <div style={{ color: "#f1f5f9", fontWeight: 500 }}>{p.full_name ?? "—"}</div>
@@ -118,8 +134,14 @@ export default async function CustomersPage({
                                                 {!p.is_admin && (
                                                     <form action={async () => {
                                                         "use server";
-                                                        if (p.is_premium) await downgradePlan(p.id);
-                                                        else await upgradeToPremium(p.id);
+                                                        const admin = createAdminClient();
+                                                        const newVal = !p.is_premium;
+                                                        await admin.from("profiles").update({
+                                                            is_premium: newVal,
+                                                            maps_limit: newVal ? 999 : 1,
+                                                            updated_at: new Date().toISOString(),
+                                                        }).eq("id", p.id);
+                                                        revalidatePath("/admin/customers");
                                                     }}>
                                                         <button type="submit" className="btn-ghost" style={{ padding: "5px 12px", fontSize: 12, color: p.is_premium ? "#f87171" : "#10b981" }}>
                                                             {p.is_premium ? "⬇ Rebaixar" : "⬆ Upgrade"}
