@@ -24,7 +24,7 @@ export default function CTA() {
                     Pronto para se descobrir <span className="gradient-text">nos astros</span>?
                 </h2>
                 <p style={{ color: "#64748b", marginBottom: 32, fontSize: 16 }}>
-                    Comece agora, grátis. Seu mapa natal completo em menos de 30 segundos.
+                    Comece agora, grátis. Seu mapa astral completo em menos de 30 segundos.
                 </p>
                 <Link href="/register" className="btn-gold" style={{ padding: "16px 48px", fontSize: 17, borderRadius: 14 }}>
                     ✨ Criar meu mapa gratuitamente

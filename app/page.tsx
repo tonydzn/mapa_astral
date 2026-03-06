@@ -4,6 +4,8 @@ import Features from "@/components/landing/Features";
 import Pricing from "@/components/landing/Pricing";
 import Testimonials from "@/components/landing/Testimonials";
 import CTA from "@/components/landing/CTA";
+import ProductPreview from "@/components/landing/ProductPreview";
+
 
 export default function HomePage() {
   return (
@@ -21,6 +23,9 @@ export default function HomePage() {
 
       {/* ===== HERO ===== */}
       <Hero />
+
+      {/* ===== PREVIEW ===== */}
+      <ProductPreview />
 
       {/* ===== FEATURES ===== */}
       <Features />
