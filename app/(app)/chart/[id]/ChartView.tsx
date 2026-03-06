@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import MandalaChart from "@/components/astro/MandalaChart";
 import Header from "@/components/layout/Header";
 import PremiumModal from "@/components/checkout/PremiumModal";
@@ -48,10 +48,18 @@ export default function ChartView({ chart, profile }: Props) {
     const [interpretation, setInterpretation] = useState(chart.full_interpretation ?? "");
     const [generating, setGenerating] = useState(false);
     const [interpretationError, setInterpretationError] = useState("");
-    const [activeTab, setActiveTab] = useState("planets");
+    const [activeTab, setActiveTab] = useState("ai");
     const [showPremium, setShowPremium] = useState(false);
+    const didAutoGenerate = useRef(false);
 
     const isPremium = profile?.is_premium ?? false;
+
+    useEffect(() => {
+        if (!interpretation && !didAutoGenerate.current) {
+            didAutoGenerate.current = true;
+            handleGenerate();
+        }
+    }, [interpretation]);
 
     async function handleGenerate() {
         setGenerating(true);
