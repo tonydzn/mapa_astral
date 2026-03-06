@@ -30,22 +30,21 @@ export async function createBirthChart(formData: {
     const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString();
 
     if (profile.is_premium) {
-        // Premium: 1 mapa a cada 30 dias
+        // Premium: 3 mapas vitalícios
         const { count } = await supabase
             .from("birth_charts")
             .select("*", { count: "exact", head: true })
-            .eq("user_id", user.id)
-            .gte("created_at", thirtyDaysAgo);
+            .eq("user_id", user.id);
 
-        if (count && count >= 1) {
+        if (count && count >= 3) {
             return {
                 error: "LIMIT_REACHED",
-                message: "Como usuário Premium, você pode gerar 1 mapa completo a cada 30 dias.",
+                message: "O seu plano Premium inclui 3 mapas natais completos. Você já atingiu este limite vitalício.",
             };
         }
     } else {
         // Gratuito: 1 mapa total
-        if (profile.maps_count >= 1) {
+        if ((profile.maps_count ?? 0) >= 1) {
             return {
                 error: "LIMIT_REACHED",
                 message: "Você atingiu o limite de 1 mapa gratuito. Torne-se Premium para gerar novos mapas completos mensalmente!",

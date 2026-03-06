@@ -60,7 +60,7 @@ export default function NewChartPage() {
         });
 
         if (result.error === "LIMIT_REACHED") {
-            setError("Você atingiu o limite de mapas gratuitos. Faça upgrade para Premium!");
+            setError(result.message || "Você atingiu o limite de mapas. Faça upgrade para Premium!");
             setLoading(false);
             return;
         }
