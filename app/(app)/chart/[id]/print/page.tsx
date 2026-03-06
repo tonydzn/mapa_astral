@@ -119,7 +119,7 @@ export default async function ChartPrintPage({ params }: { params: Promise<{ id:
                 `}</style>
             </head>
             <body>
-                <button className="print-btn" onClick={() => window.print()}>🖨️ Imprimir / Salvar PDF</button>
+                <button className="print-btn">🖨️ Imprimir / Salvar PDF</button>
 
                 <div className="page">
                     {/* ── HEADER ── */}
