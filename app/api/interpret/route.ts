@@ -50,9 +50,7 @@ export async function POST(req: NextRequest) {
         .eq("id", user.id)
         .single();
 
-    const rawModel = profile?.is_premium
-        ? (process.env.PREMIUM_MODEL || "google/gemini-2.0-flash-001")
-        : (process.env.FREE_MODEL || "meta-llama/llama-3.3-70b-instruct");
+    const rawModel = process.env.PREMIUM_MODEL || "google/gemini-2.0-flash-001";
     const model = rawModel.trim();
 
     // Extrai dados do chart_data com segurança
