@@ -47,7 +47,7 @@ export default function Features() {
                                 {f.type === "image" ? (
                                     <img
                                         src={f.icon}
-                                        alt={f.title}
+                                        alt={`Ícone de ${f.title}`}
                                         style={{ height: "100%", width: "auto", filter: `drop-shadow(0 0 12px ${f.color}40)` }}
                                     />
                                 ) : (

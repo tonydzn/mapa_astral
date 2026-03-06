@@ -79,7 +79,7 @@ export default function Hero() {
                     <div style={{ position: "absolute", inset: -20, background: "radial-gradient(circle, rgba(139,92,246,0.1), transparent 70%)", zIndex: 0 }} />
                     <img
                         src="/images/hero-desktop.png"
-                        alt="Astrology Chart"
+                        alt="Mapa Natal Completo - Exemplo de Interpretação Astrológica"
                         style={{ width: "100%", height: "auto", borderRadius: 24, border: "1px solid rgba(255,255,255,0.08)", position: "relative", zIndex: 1 }}
                         className="animate-float"
                     />
@@ -100,7 +100,7 @@ export default function Hero() {
                     >
                         <img
                             src="/images/hero-mobile.png"
-                            alt="Mobile Preview"
+                            alt="Interface do Aplicativo Mapa Astral no Celular"
                             style={{ width: "100%", height: "auto", borderRadius: 16, border: "1px solid rgba(255,255,255,0.15)", boxShadow: "0 25px 50px -12px rgba(0,0,0,0.5)" }}
                         />
                     </motion.div>

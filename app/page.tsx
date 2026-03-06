@@ -39,6 +39,39 @@ export default function HomePage() {
       {/* ===== CTA FINAL ===== */}
       <CTA />
 
+      {/* JSON-LD Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            "name": "Mapa Astral",
+            "url": "https://mapa-astral.net",
+            "potentialAction": {
+              "@type": "SearchAction",
+              "target": "https://mapa-astral.net/search?q={search_term_string}",
+              "query-input": "required name=search_term_string"
+            }
+          })
+        }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Organization",
+            "name": "Mapa Astral",
+            "url": "https://mapa-astral.net",
+            "logo": "https://mapa-astral.net/images/og-main.png",
+            "sameAs": [
+              "https://www.instagram.com/mapaastral",
+              "https://twitter.com/mapaastral"
+            ]
+          })
+        }}
+      />
     </div>
   );
 }

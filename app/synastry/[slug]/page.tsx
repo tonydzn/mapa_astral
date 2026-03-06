@@ -1,6 +1,52 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { notFound } from "next/navigation";
 import SynastryForm from "./SynastryForm";
+import type { Metadata } from "next";
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+    const { slug } = await params;
+    const supabase = createAdminClient();
+
+    const { data: link } = await supabase
+        .from("synastry_links")
+        .select("owner_id, second_person_name")
+        .eq("slug", slug)
+        .single();
+
+    if (!link) return { title: "Sinastria não encontrada" };
+
+    const { data: profile } = await supabase
+        .from("profiles")
+        .select("full_name")
+        .eq("id", link.owner_id)
+        .single();
+
+    const ownerName = profile?.full_name ?? "alguém";
+    const title = link.second_person_name
+        ? `Sinastria entre ${ownerName} e ${link.second_person_name} | Mapa Astral`
+        : `Sinastria de ${ownerName} | Mapa Astral`;
+
+    const description = link.second_person_name
+        ? `Confira a compatibilidade astrológica entre ${ownerName} e ${link.second_person_name}.`
+        : `Descubra sua compatibilidade astrológica com ${ownerName}. Calcule sua sinastria agora!`;
+
+    return {
+        title,
+        description,
+        openGraph: {
+            title,
+            description,
+            type: "website",
+            images: ["/images/og-main.png"], // Idealmente uma imagem personalizada por sinastria
+        },
+        twitter: {
+            card: "summary_large_image",
+            title,
+            description,
+            images: ["/images/og-main.png"],
+        }
+    };
+}
 
 export default async function SynastryPublicPage({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = await params;
