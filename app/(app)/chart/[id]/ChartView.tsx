@@ -95,7 +95,10 @@ export default function ChartView({ chart, profile }: Props) {
                 subtitle={[chart.birth_place, chart.birth_date && new Date(chart.birth_date).toLocaleDateString("pt-BR"), chart.birth_time && `às ${chart.birth_time}`].filter(Boolean).join(" · ")}
                 activeTab={activeTab}
                 tabs={tabs}
-                onTabChange={setActiveTab}
+                onTabChange={(key) => {
+                    setActiveTab(key);
+                    document.getElementById(key)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }}
                 profile={profile}
                 onShowPremium={() => setShowPremium(true)}
             />
@@ -138,11 +141,11 @@ export default function ChartView({ chart, profile }: Props) {
                 </div>
 
                 {/* MAIN PANEL */}
-                <div className="card" style={{ padding: 28, minHeight: 500 }}>
+                <div className="card" style={{ padding: 28 }}>
+                    <div className="flex flex-col gap-12">
 
-                    {/* ===== PLANETS ===== */}
-                    {activeTab === "planets" && (
-                        <div className="animate-fade-in">
+                        {/* ===== PLANETS ===== */}
+                        <div id="planets" className="scroll-mt-24">
                             <h2 style={{ fontSize: 16, fontWeight: 700, color: "#fff", marginBottom: 20 }}>Posições Planetárias</h2>
                             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: 10 }}>
                                 {chartData.planets?.map(p => (
@@ -160,11 +163,9 @@ export default function ChartView({ chart, profile }: Props) {
                                 ))}
                             </div>
                         </div>
-                    )}
 
-                    {/* ===== ASPECTS ===== */}
-                    {activeTab === "aspects" && (
-                        <div className="animate-fade-in">
+                        {/* ===== ASPECTS ===== */}
+                        <div id="aspects" className="scroll-mt-24">
                             <h2 style={{ fontSize: 16, fontWeight: 700, color: "#fff", marginBottom: 20 }}>Aspectos Principais</h2>
                             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                                 {chartData.aspects?.map((a, i) => (
@@ -181,11 +182,9 @@ export default function ChartView({ chart, profile }: Props) {
                                 ))}
                             </div>
                         </div>
-                    )}
 
-                    {/* ===== AI INTERPRETATION ===== */}
-                    {activeTab === "ai" && (
-                        <div className="animate-fade-in">
+                        {/* ===== AI INTERPRETATION ===== */}
+                        <div id="ai" className="scroll-mt-24">
                             <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "center", gap: 16, marginBottom: 24 }}>
                                 <div>
                                     <h2 style={{ fontSize: 16, fontWeight: 700, color: "#fff", margin: 0 }}>Interpretação de Mapa Astral</h2>
@@ -240,18 +239,48 @@ export default function ChartView({ chart, profile }: Props) {
                                 <div style={{ textAlign: "center", padding: "60px 20px" }}>
                                     <div style={{ fontSize: 56, marginBottom: 16, opacity: .3 }}>🔮</div>
                                     <p style={{ color: "#475569", fontSize: 15, marginBottom: 8 }}>Nenhuma interpretação ainda</p>
-                                    <p style={{ color: "#334155", fontSize: 13 }}>Clique em "✨ Gerar interpretação" para desbloquear os insights do seu mapa</p>
+                                    <p style={{ color: "#334155", fontSize: 13 }}>Aguarde um momento e desbloqueie os insights do seu mapa</p>
                                 </div>
                             )}
 
                             {interpretation && !generating && (
-                                <div className="interpretation-content"
-                                    dangerouslySetInnerHTML={{ __html: renderMarkdown(interpretation) }}
-                                    style={{ fontSize: 14, lineHeight: 1.85 }}
-                                />
+                                <div style={{ position: "relative", maxHeight: !isPremium ? 600 : "none", overflow: "hidden" }}>
+                                    <div className="interpretation-content"
+                                        dangerouslySetInnerHTML={{ __html: renderMarkdown(interpretation) }}
+                                        style={{ fontSize: 14, lineHeight: 1.85 }}
+                                    />
+
+                                    {/* PAYWALL OVERLAY */}
+                                    {!isPremium && (
+                                        <div style={{
+                                            position: "absolute",
+                                            bottom: 0, left: 0, right: 0,
+                                            height: 380,
+                                            background: "linear-gradient(to bottom, rgba(15,26,46,0) 0%, rgba(15,26,46,0.9) 30%, rgba(15,26,46,1) 100%)",
+                                            display: "flex", flexDirection: "column", justifyContent: "flex-end", alignItems: "center",
+                                            paddingBottom: 20,
+                                            zIndex: 10
+                                        }}>
+                                            <div style={{
+                                                background: "rgba(2,6,23,0.7)", border: "1px solid rgba(245,158,11,0.2)", borderRadius: 16,
+                                                padding: "24px", maxWidth: 450, textAlign: "center", backdropFilter: "blur(8px)",
+                                                boxShadow: "0 20px 40px rgba(0,0,0,0.5)"
+                                            }}>
+                                                <div style={{ fontSize: 32, marginBottom: 12 }}>✨</div>
+                                                <h3 style={{ fontSize: 17, color: "#fff", fontWeight: 700, marginBottom: 8 }}>Seu Mapa Não Termina Aqui!</h3>
+                                                <p style={{ color: "#94a3b8", fontSize: 13, marginBottom: 20 }}>
+                                                    Acesse a interpretação profunda e detalhada sobre o amor, carreira e missão de vida com a versão completa.
+                                                </p>
+                                                <button onClick={() => setShowPremium(true)} className="btn-gold" style={{ width: "100%", padding: "12px 24px", fontSize: 13, display: "flex", justifyContent: "center", gap: 8, alignItems: "center" }}>
+                                                    <span>✦</span> Desbloquear Versão Premium
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
                             )}
                         </div>
-                    )}
+                    </div>
                 </div>
             </div>
         </div>
