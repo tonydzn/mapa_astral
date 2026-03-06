@@ -203,9 +203,11 @@ export default function ChartView({ chart, profile }: Props) {
                                             </button>
                                         )
                                     )}
-                                    <button onClick={handleGenerate} disabled={generating} className="btn-gold" style={{ padding: "9px 18px", fontSize: 13, width: "auto" }}>
-                                        {generating ? "⏳ Gerando..." : interpretation ? "🔄 Regenerar" : "✨ Gerar interpretação"}
-                                    </button>
+                                    {!interpretation && (
+                                        <button onClick={handleGenerate} disabled={generating} className="btn-gold" style={{ padding: "9px 18px", fontSize: 13, width: "auto" }}>
+                                            {generating ? "⏳ Gerando..." : "✨ Gerar interpretação"}
+                                        </button>
+                                    )}
                                 </div>
                             </div>
 
