@@ -104,13 +104,13 @@ export default async function ChartPrintPage({ params }: { params: Promise<{ id:
                 .print-btn { position:fixed; top:20px; right:20px; background:linear-gradient(135deg,#f59e0b,#d97706); color:#0a0600; border:none; border-radius:10px; padding:12px 20px; font-weight:700; font-size:14px; cursor:pointer; z-index:999; display:flex; align-items:center; gap:6px; }
                 @media print {
                     .print-btn { display: none !important; }
-                    body, .page-wrapper { background: white !important; color: #111 !important; }
-                    .main-title { color: #b45309 !important; }
-                    .section-title { color: #7c3aed !important; }
-                    .pillar { background: #f8fafc !important; border-color:#e2e8f0 !important; }
-                    .pillar-value { color: #111 !important; }
-                    .interpretation { color: #374151 !important; }
-                    .aspect-row { background: #f8fafc !important; }
+                    * { color: black !important; background: transparent !important; box-shadow: none !important; text-shadow: none !important; }
+                    body, .page-wrapper, .page, .pillar, .aspect-row { background: white !important; }
+                    .header { border-bottom: 2px solid black !important; }
+                    .logo-star { filter: none !important; }
+                    .section-title { border-left-color: black !important; }
+                    .pillar, .aspect-row { border: 1px solid #ccc !important; }
+                    .planets-table th, .planets-table td, .planets-table tr { border-color: #ccc !important; }
                 }
             `}</style>
 
