@@ -2,6 +2,9 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { notFound, redirect } from "next/navigation";
 import ChartView from "./ChartView";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default async function ChartPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
 

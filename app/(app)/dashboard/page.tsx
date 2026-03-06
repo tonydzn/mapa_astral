@@ -5,6 +5,9 @@ import { getMoodHistory } from "@/actions/mood.actions";
 import { currentMoonPhase } from "@/lib/astro-engine";
 import DashboardClient from "./DashboardClient";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default async function DashboardPage() {
     const supabase = await createServerSupabaseClient();
     const { data: { user } } = await supabase.auth.getUser();

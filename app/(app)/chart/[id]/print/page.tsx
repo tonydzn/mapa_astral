@@ -2,6 +2,9 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { notFound, redirect } from "next/navigation";
 import type { ChartData } from "@/lib/astro-engine";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 const PLANET_SYMBOLS: Record<string, string> = {
     "Sol": "☀", "Lua": "☽", "Mercúrio": "☿", "Vênus": "♀", "Marte": "♂",
     "Júpiter": "♃", "Saturno": "♄", "Urano": "♅", "Netuno": "♆", "Plutão": "♇",

@@ -52,24 +52,25 @@ export default function Header({
             borderBottom: "1px solid rgba(255,255,255,.05)",
             background: "rgba(2,6,23,.9)",
             backdropFilter: "blur(20px)",
-            padding: "0 16px" // Reduzido para mobile
+            padding: "16px 24px" // Mais respiro lateral e vertical
         }}>
             <div style={{
                 maxWidth: 1200,
                 margin: "0 auto",
                 display: "flex",
                 alignItems: "center",
-                justifyContent: "space-between", // Melhor distribuição
-                gap: 12,
-                height: 60
+                justifyContent: "space-between",
+                gap: 20, // Maior espaço entre os blocos
+                minHeight: 68,
+                height: "auto"
             }}>
                 {/* Logo & Back button */}
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                     {showBack && (
                         <Link href="/dashboard" style={{
-                            color: "#475569",
+                            color: "#64748b",
                             textDecoration: "none",
-                            fontSize: 22,
+                            fontSize: 24, // Seta de voltar um pouco maior
                             display: "flex",
                             alignItems: "center",
                             transition: "color .2s",
@@ -79,9 +80,9 @@ export default function Header({
                             ←
                         </Link>
                     )}
-                    <Link href="/dashboard" style={{ display: "flex", alignItems: "center", gap: 6, textDecoration: "none" }}>
-                        <span style={{ color: "#f59e0b", fontSize: 18, filter: "drop-shadow(0 0 8px rgba(245,158,11,.5))" }}>✦</span>
-                        <span className="hidden sm:inline-block" style={{ color: "#f59e0b", fontWeight: 800, letterSpacing: 1, fontSize: 13, whiteSpace: "nowrap" }}>Mapa Astral</span>
+                    <Link href="/dashboard" style={{ display: "flex", alignItems: "center", gap: 8, textDecoration: "none", marginRight: 16 }}>
+                        <span style={{ color: "#f59e0b", fontSize: 24, filter: "drop-shadow(0 0 8px rgba(245,158,11,.5))" }}>✦</span>
+                        <span className="hidden sm:inline-block" style={{ color: "#f59e0b", fontWeight: 800, letterSpacing: 1.5, fontSize: 16, whiteSpace: "nowrap" }}>Mapa Astral</span>
                     </Link>
                 </div>
 
@@ -91,8 +92,8 @@ export default function Header({
                         flex: 1,
                         minWidth: 0,
                     }}>
-                        {title && <div style={{ fontWeight: 700, color: "#f1f5f9", fontSize: 14, lineHeight: 1.2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{title}</div>}
-                        {subtitle && <div style={{ color: "#334155", fontSize: 11, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{subtitle}</div>}
+                        {title && <div style={{ fontWeight: 700, color: "#f8fafc", fontSize: 18, lineHeight: 1.3, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{title}</div>}
+                        {subtitle && <div style={{ color: "#94a3b8", fontSize: 13, marginTop: 4, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{subtitle}</div>}
                     </div>
                 )}
 
@@ -105,14 +106,15 @@ export default function Header({
                         overflowX: "auto",
                         msOverflowStyle: "none",
                         scrollbarWidth: "none",
-                        padding: "4px 0"
+                        padding: "8px 0",
+                        justifyContent: "center" // Centraliza as abas
                     }}>
                         {tabs.map((tab) => (
                             <button
                                 key={tab.key}
                                 className={`nav-pill ${activeTab === tab.key ? "active" : ""}`}
                                 onClick={() => onTabChange(tab.key)}
-                                style={{ fontSize: 12 }}
+                                style={{ fontSize: 14, padding: "10px 20px" }}
                             >
                                 <span className="sm:hidden">{tab.label.split(" ")[0]} {tab.label.split(" ").slice(1, 2)}</span>
                                 <span className="hidden sm:inline">{tab.label}</span>
@@ -122,9 +124,9 @@ export default function Header({
                 )}
 
                 {/* Right side */}
-                <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 16, flexShrink: 0 }}>
                     {!isPremium && onShowPremium && (
-                        <button onClick={onShowPremium} className="btn-gold" style={{ padding: "6px 10px", fontSize: 11, borderRadius: 8, width: "auto" }}>
+                        <button onClick={onShowPremium} className="btn-gold" style={{ padding: "10px 18px", fontSize: 14, borderRadius: 8, width: "auto" }}>
                             <span className="hidden sm:inline">✨ Tornar-se premium</span>
                             <span className="sm:hidden">✨ Premium</span>
                         </button>
@@ -132,18 +134,19 @@ export default function Header({
                     {isPremium && <span className="badge-gold hidden min-[480px]:inline-block">✦ Premium</span>}
 
                     <div style={{
-                        width: 32,
-                        height: 32,
+                        width: 42, // Avatar maior
+                        height: 42,
                         borderRadius: "50%",
                         background: "linear-gradient(135deg,#7c3aed,#f59e0b)",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
                         fontWeight: 700,
-                        fontSize: 13,
+                        fontSize: 16,
                         color: "#fff",
                         flexShrink: 0,
-                        cursor: "pointer"
+                        cursor: "pointer",
+                        boxShadow: "0 2px 8px rgba(0,0,0,0.2)"
                     }} onClick={handleLogout} title="Sair">
                         {firstName[0]?.toUpperCase() || "A"}
                     </div>
