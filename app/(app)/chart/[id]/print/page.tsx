@@ -42,83 +42,79 @@ export default async function ChartPrintPage({ params }: { params: Promise<{ id:
     const interpretation = (chartRaw.full_interpretation as string | null) ?? "";
 
     return (
-        <html lang="pt-BR">
-            <head>
-                <meta charSet="utf-8" />
-                <meta name="viewport" content="width=device-width, initial-scale=1" />
-                <title>Mapa Astral — {chartRaw.name}</title>
-                <style>{`
-                    * { box-sizing: border-box; margin: 0; padding: 0; }
-                    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
-                    body { font-family: 'Inter', system-ui, sans-serif; background:#020617; color:#f1f5f9; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-                    .page { max-width: 800px; margin: 0 auto; padding: 48px 40px; }
-                    
-                    /* HEADER */
-                    .header { border-bottom: 2px solid #f59e0b; padding-bottom: 24px; margin-bottom: 36px; }
-                    .logo { display:flex; align-items:center; gap:8px; margin-bottom:20px; }
-                    .logo-star { color:#f59e0b; font-size:20px; filter:drop-shadow(0 0 8px rgba(245,158,11,.5)); }
-                    .logo-text { color:#f59e0b; font-weight:800; letter-spacing:2px; font-size:14px; }
-                    .main-title { font-size: 36px; font-weight: 800; color: #fbbf24; margin-bottom: 8px; }
-                    .subtitle { font-size: 15px; color: #94a3b8; margin-bottom: 4px; }
-                    .birth-info { font-size: 13px; color: #475569; }
-                    
-                    /* PILLARS */
-                    .section { margin-bottom: 32px; }
-                    .section-title { font-size: 13px; font-weight: 700; color: #8b5cf6; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 16px; padding-left: 12px; border-left: 3px solid #8b5cf6; }
-                    .pillars { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
-                    .pillar { background: #0f172a; border: 1px solid #1e293b; border-radius: 10px; padding: 14px; }
-                    .pillar-label { font-size: 10px; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
-                    .pillar-value { font-size: 16px; font-weight: 700; color: #fff; }
-                    .pillar-sub { font-size: 11px; color: #475569; margin-top: 2px; }
-                    
-                    /* PLANETS TABLE */
-                    .planets-table { width: 100%; border-collapse: collapse; }
-                    .planets-table thead tr { border-bottom: 2px solid #1e293b; }
-                    .planets-table th { text-align:left; font-size: 10px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 1px; padding: 8px 12px; }
-                    .planets-table tbody tr { border-bottom: 1px solid #0f172a; }
-                    .planets-table tbody tr:hover { background: rgba(255,255,255,.02); }
-                    .planets-table td { padding: 10px 12px; font-size: 13px; }
-                    .planet-symbol { font-size: 18px; margin-right: 6px; }
-                    .planet-name { font-weight: 600; color: #f1f5f9; }
-                    .planet-sign { color: #f59e0b; }
-                    .planet-degree { color: #94a3b8; }
-                    .planet-house { color: #8b5cf6; text-align: right; }
-                    .planet-retro { color: #f43f5e; font-size: 11px; }
-                    
-                    /* ASPECTS */
-                    .aspects-grid { display: flex; flex-direction: column; gap: 6px; }
-                    .aspect-row { display:flex; align-items:center; gap:12px; padding: 8px 12px; background:#0f172a; border-radius:8px; font-size: 12px; }
-                    .aspect-planet { color:#94a3b8; width: 100px; }
-                    .aspect-type { font-weight:700; width: 110px; text-align:center; }
-                    .aspect-orb { color:#334155; margin-left:auto; }
-                    
-                    /* INTERPRETATION */
-                    .interpretation { font-size: 13px; line-height: 1.85; color: #cbd5e1; }
-                    .interpretation h1, .interpretation h2, .interpretation h3 { color: #f59e0b; font-weight: 700; margin: 20px 0 8px; }
-                    .interpretation h1 { font-size: 18px; }
-                    .interpretation h2 { font-size: 16px; }
-                    .interpretation h3 { font-size: 14px; color: #c4b5fd; }
-                    .interpretation p { margin-bottom: 10px; }
-                    .interpretation strong { color:#f1f5f9; }
-                    
-                    /* FOOTER */
-                    .footer { margin-top: 48px; padding-top: 20px; border-top: 1px solid #1e293b; text-align:center; font-size: 11px; color: #334155; }
-                    
-                    /* PRINT */
-                    .print-btn { position:fixed; top:20px; right:20px; background:linear-gradient(135deg,#f59e0b,#d97706); color:#0a0600; border:none; border-radius:10px; padding:12px 20px; font-weight:700; font-size:14px; cursor:pointer; z-index:999; display:flex; align-items:center; gap:6px; }
-                    @media print {
-                        .print-btn { display: none !important; }
-                        body { background: white !important; color: #111 !important; }
-                        .main-title { color: #b45309 !important; }
-                        .section-title { color: #7c3aed !important; }
-                        .pillar { background: #f8fafc !important; border-color:#e2e8f0 !important; }
-                        .pillar-value { color: #111 !important; }
-                        .interpretation { color: #374151 !important; }
-                        .aspect-row { background: #f8fafc !important; }
-                    }
-                `}</style>
-            </head>
-            <body>
+        <div lang="pt-BR" style={{ backgroundColor: "#020617", minHeight: "100vh" }}>
+            <style>{`
+                * { box-sizing: border-box; margin: 0; padding: 0; }
+                @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+                body { font-family: 'Inter', system-ui, sans-serif; background:#020617; color:#f1f5f9; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+                .page { max-width: 800px; margin: 0 auto; padding: 48px 40px; }
+                
+                /* HEADER */
+                .header { border-bottom: 2px solid #f59e0b; padding-bottom: 24px; margin-bottom: 36px; }
+                .logo { display:flex; align-items:center; gap:8px; margin-bottom:20px; }
+                .logo-star { color:#f59e0b; font-size:20px; filter:drop-shadow(0 0 8px rgba(245,158,11,.5)); }
+                .logo-text { color:#f59e0b; font-weight:800; letter-spacing:2px; font-size:14px; }
+                .main-title { font-size: 36px; font-weight: 800; color: #fbbf24; margin-bottom: 8px; }
+                .subtitle { font-size: 15px; color: #94a3b8; margin-bottom: 4px; }
+                .birth-info { font-size: 13px; color: #475569; }
+                
+                /* PILLARS */
+                .section { margin-bottom: 32px; }
+                .section-title { font-size: 13px; font-weight: 700; color: #8b5cf6; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 16px; padding-left: 12px; border-left: 3px solid #8b5cf6; }
+                .pillars { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+                .pillar { background: #0f172a; border: 1px solid #1e293b; border-radius: 10px; padding: 14px; }
+                .pillar-label { font-size: 10px; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+                .pillar-value { font-size: 16px; font-weight: 700; color: #fff; }
+                .pillar-sub { font-size: 11px; color: #475569; margin-top: 2px; }
+                
+                /* PLANETS TABLE */
+                .planets-table { width: 100%; border-collapse: collapse; }
+                .planets-table thead tr { border-bottom: 2px solid #1e293b; }
+                .planets-table th { text-align:left; font-size: 10px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 1px; padding: 8px 12px; }
+                .planets-table tbody tr { border-bottom: 1px solid #0f172a; }
+                .planets-table tbody tr:hover { background: rgba(255,255,255,.02); }
+                .planets-table td { padding: 10px 12px; font-size: 13px; }
+                .planet-symbol { font-size: 18px; margin-right: 6px; }
+                .planet-name { font-weight: 600; color: #f1f5f9; }
+                .planet-sign { color: #f59e0b; }
+                .planet-degree { color: #94a3b8; }
+                .planet-house { color: #8b5cf6; text-align: right; }
+                .planet-retro { color: #f43f5e; font-size: 11px; }
+                
+                /* ASPECTS */
+                .aspects-grid { display: flex; flex-direction: column; gap: 6px; }
+                .aspect-row { display:flex; align-items:center; gap:12px; padding: 8px 12px; background:#0f172a; border-radius:8px; font-size: 12px; }
+                .aspect-planet { color:#94a3b8; width: 100px; }
+                .aspect-type { font-weight:700; width: 110px; text-align:center; }
+                .aspect-orb { color:#334155; margin-left:auto; }
+                
+                /* INTERPRETATION */
+                .interpretation { font-size: 13px; line-height: 1.85; color: #cbd5e1; }
+                .interpretation h1, .interpretation h2, .interpretation h3 { color: #f59e0b; font-weight: 700; margin: 20px 0 8px; }
+                .interpretation h1 { font-size: 18px; }
+                .interpretation h2 { font-size: 16px; }
+                .interpretation h3 { font-size: 14px; color: #c4b5fd; }
+                .interpretation p { margin-bottom: 10px; }
+                .interpretation strong { color:#f1f5f9; }
+                
+                /* FOOTER */
+                .footer { margin-top: 48px; padding-top: 20px; border-top: 1px solid #1e293b; text-align:center; font-size: 11px; color: #334155; }
+                
+                /* PRINT */
+                .print-btn { position:fixed; top:20px; right:20px; background:linear-gradient(135deg,#f59e0b,#d97706); color:#0a0600; border:none; border-radius:10px; padding:12px 20px; font-weight:700; font-size:14px; cursor:pointer; z-index:999; display:flex; align-items:center; gap:6px; }
+                @media print {
+                    .print-btn { display: none !important; }
+                    body, .page-wrapper { background: white !important; color: #111 !important; }
+                    .main-title { color: #b45309 !important; }
+                    .section-title { color: #7c3aed !important; }
+                    .pillar { background: #f8fafc !important; border-color:#e2e8f0 !important; }
+                    .pillar-value { color: #111 !important; }
+                    .interpretation { color: #374151 !important; }
+                    .aspect-row { background: #f8fafc !important; }
+                }
+            `}</style>
+
+            <div className="page-wrapper" style={{ width: "100%" }}>
                 <button className="print-btn">🖨️ Imprimir / Salvar PDF</button>
 
                 <div className="page">
@@ -234,9 +230,10 @@ export default async function ChartPrintPage({ params }: { params: Promise<{ id:
 
                 <script dangerouslySetInnerHTML={{
                     __html: `
+                    window.document.title = "Mapa Astral — ${chartRaw.name}";
                     document.querySelector('.print-btn').addEventListener('click', function() { window.print(); });
                 ` }} />
-            </body>
-        </html>
+            </div>
+        </div>
     );
 }
