@@ -65,7 +65,7 @@ export async function POST(req: NextRequest) {
                 payer: {
                     email: user.email ?? "cliente@mapaastral.com",
                 },
-                external_reference: order?.id || user.id,
+                external_reference: `${user.id}|${order?.id ?? ""}`,
                 back_urls: {
                     success: `${appUrl}/dashboard?payment=success`,
                     failure: `${appUrl}/dashboard?payment=failure`,
