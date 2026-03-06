@@ -50,13 +50,13 @@ export default async function ChartPrintPage({ params }: { params: Promise<{ id:
                 .page { max-width: 800px; margin: 0 auto; padding: 48px 40px; }
                 
                 /* HEADER */
-                .header { border-bottom: 2px solid #f59e0b; padding-bottom: 24px; margin-bottom: 36px; }
-                .logo { display:flex; align-items:center; gap:8px; margin-bottom:20px; }
-                .logo-star { color:#f59e0b; font-size:20px; filter:drop-shadow(0 0 8px rgba(245,158,11,.5)); }
-                .logo-text { color:#f59e0b; font-weight:800; letter-spacing:2px; font-size:14px; }
-                .main-title { font-size: 36px; font-weight: 800; color: #fbbf24; margin-bottom: 8px; }
-                .subtitle { font-size: 15px; color: #94a3b8; margin-bottom: 4px; }
-                .birth-info { font-size: 13px; color: #475569; }
+                .header { border-bottom: 2px solid #f59e0b; padding-bottom: 32px; margin-bottom: 48px; }
+                .logo { display:flex; align-items:center; gap:10px; margin-bottom:28px; }
+                .logo-star { color:#f59e0b; font-size:24px; filter:drop-shadow(0 0 8px rgba(245,158,11,.5)); }
+                .logo-text { color:#f59e0b; font-weight:800; letter-spacing:3px; font-size:16px; }
+                .main-title { font-size: 42px; font-weight: 800; color: #fbbf24; margin-bottom: 16px; line-height: 1.1; }
+                .subtitle { font-size: 18px; color: #94a3b8; margin-bottom: 10px; }
+                .birth-info { font-size: 15px; color: #475569; }
                 
                 /* PILLARS */
                 .section { margin-bottom: 32px; }
